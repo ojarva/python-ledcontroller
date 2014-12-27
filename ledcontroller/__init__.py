@@ -57,8 +57,10 @@ class LedController(object):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.sendto(command, (self.ip, self.port))
 
-    def send_to_group(self, group, command, send_on=True):
-        for _ in range(self.repeat_commands):
+    def send_to_group(self, group, command, send_on=True, retries=None):
+        if retries is None:
+            retries = self.repeat_commands
+        for _ in range(retries):
             if group is None or group == 0:
                 if send_on:
                     self.send_command(self.COMMANDS["all_on"])
@@ -89,7 +91,10 @@ class LedController(object):
         self.send_to_group(group, self.GROUP_X_TO_WHITE[group-1])
 
     def set_color(self, color, group=None):
-        self.send_to_group(group, self.COMMANDS["color_to_"+color])
+        if color == "white":
+            self.white(group)
+        else:
+            self.send_to_group(group, self.COMMANDS["color_to_"+color])
 
     def set_brightness(self, percent, group=None):
         if percent < 0:
@@ -99,6 +104,15 @@ class LedController(object):
         # Map 0-100 to 2-27
         value = int(2 + ((float(percent) / 100) * 25))
         self.send_to_group(group, ("\x4e", chr(value)))
+
+    def disco(self, group=None):
+        self.send_to_group(group, self.COMMANDS["disco"], True, 1)
+
+    def disco_faster(self, group=None):
+        self.send_to_group(group, self.COMMANDS["disco_faster"], True, 1)
+
+    def disco_slower(self, group=None):
+        self.send_to_group(group, self.COMMANDS["disco_slower"], True, 1)
 
 
 def main():
