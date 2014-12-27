@@ -32,7 +32,6 @@ setup(
     ],
     keywords='limitlessled easybulb milight led wifi',
     packages=["ledcontroller"],
-    test_suite="tests",
     install_requires=[],
 
     extras_require = {
