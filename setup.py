@@ -9,7 +9,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='ledcontroller',
-    version='1.0.0',
+    version='1.0.1',
     description='Controller library for limitlessled/easybulb/milight Wi-Fi LEDs',
     long_description=long_description,
     url='https://github.com/ojarva/python-ledcontroller',
@@ -21,7 +21,6 @@ setup(
         'Development Status :: 4 - Beta',
         'Topic :: Home Automation',
         'Intended Audience :: Developers',
-        'Intended Audience :: System Administrators',
         'License :: OSI Approved :: BSD License',
 
         'Programming Language :: Python :: 2.7',
