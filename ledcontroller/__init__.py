@@ -1,7 +1,13 @@
 """
-Class for controlling leds. See https://github.com/ojarva/python-ledcontroller for more information.
+Library for controlling limitless/milight/easybulb RGBW leds.
 
-Based on the documentation available at http://www.limitlessled.com/dev/
+Currently only RGBW commandset is implemented. Before using this, you need to use
+smartphone/tablet app to configure light groups to the gateway. Configuring remotes
+does not enable same groups on the gateway.
+
+See https://github.com/ojarva/python-ledcontroller for more information.
+
+Based on the documentation available at http://www.limitlessled.com/dev/ .
 """
 
 import socket
