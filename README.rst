@@ -10,7 +10,7 @@ Before using this, you need to use smartphone/tablet app to configure light grou
 
 See `github repository <https://github.com/ojarva/python-ledcontroller>`_ for more information.
 
-The code is based on the documentation available at `limitlessled.com <http://www.limitlessled.com/dev/`_
+The code is based on the documentation available at `limitlessled.com <http://www.limitlessled.com/dev/>`_
 
 Installation
 ------------
