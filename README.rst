@@ -1,6 +1,9 @@
 Wi-Fi LED controller
 ====================
 
+.. image:: https://travis-ci.org/ojarva/python-ledcontroller.svg?branch=master
+    :target: https://travis-ci.org/ojarva/python-ledcontroller
+
 
 
 Controller for LimitlessLED RGBW lights (should be compatible with easybulb/milight as well).

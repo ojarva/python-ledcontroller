@@ -3,32 +3,32 @@ import socket
 import time
 
 class LedController(object):
-    GROUP_ON =  ["\x45", "\x47", "\x49", "\x4b"]
-    GROUP_OFF = ["\x46", "\x48", "\x4a", "\x4c"]
-    GROUP_X_TO_WHITE = ["\xc5", "\xc7", "\xc9", "\xcb"]
+    GROUP_ON =  [(b"\x45",), (b"\x47",), (b"\x49",), (b"\x4b",)]
+    GROUP_OFF = [(b"\x46",), (b"\x48",), (b"\x4a",), (b"\x4c",)]
+    GROUP_X_TO_WHITE = [(b"\xc5",), (b"\xc7",), (b"\xc9",), (b"\xcb",)]
     COMMANDS = {
-     "all_on": "\x42",
-     "all_off": "\x41",
-     "all_white": "\xc2",
-     "disco": "\x4d",
-     "disco_faster": "\x44",
-     "disco_slower": "\x43",
-     "color_to_violet": ("\x40", "\x00"),
-     "color_to_royal_blue": ("\x40", "\x10"),
-     "color_to_baby_blue": ("\x40", "\x20"),
-     "color_to_aqua": ("\x40", "\x30"),
-     "color_to_royal_mint": ("\x40", "\x40"),
-     "color_to_seafoam_green": ("\x40", "\x50"),
-     "color_to_green": ("\x40", "\x60"),
-     "color_to_lime_green": ("\x40", "\x70"),
-     "color_to_yellow": ("\x40", "\x80"),
-     "color_to_yellow_orange": ("\x40", "\x90"),
-     "color_to_orange": ("\x40", "\xa0"),
-     "color_to_red": ("\x40", "\xb0"),
-     "color_to_pink": ("\x40", "\xc0"),
-     "color_to_fusia": ("\x40", "\xd0"),
-     "color_to_lilac": ("\x40", "\xe0"),
-     "color_to_lavendar": ("\x40", "\xf0"),
+     "all_on": (b"\x42",),
+     "all_off": (b"\x41",),
+     "all_white": (b"\xc2",),
+     "disco": (b"\x4d",),
+     "disco_faster": (b"\x44",),
+     "disco_slower": (b"\x43",),
+     "color_to_violet": (b"\x40", b"\x00"),
+     "color_to_royal_blue": (b"\x40", b"\x10"),
+     "color_to_baby_blue": (b"\x40", b"\x20"),
+     "color_to_aqua": (b"\x40", b"\x30"),
+     "color_to_royal_mint": (b"\x40", b"\x40"),
+     "color_to_seafoam_green": (b"\x40", b"\x50"),
+     "color_to_green": (b"\x40", b"\x60"),
+     "color_to_lime_green": (b"\x40", b"\x70"),
+     "color_to_yellow": (b"\x40", b"\x80"),
+     "color_to_yellow_orange": (b"\x40", b"\x90"),
+     "color_to_orange": (b"\x40", b"\xa0"),
+     "color_to_red": (b"\x40", b"\xb0"),
+     "color_to_pink": (b"\x40", b"\xc0"),
+     "color_to_fusia": (b"\x40", b"\xd0"),
+     "color_to_lilac": (b"\x40", b"\xe0"),
+     "color_to_lavendar": (b"\x40", b"\xf0"),
     }
 
     def __init__(self, ip, **kwargs):
@@ -46,7 +46,7 @@ class LedController(object):
             # Lights require 100ms pause between commands to function at least almost reliably.
             time.sleep(self.pause_between_commands - time_since_last_command)
         self.last_command_at = time.time()
-        command = ""
+        command = b""
         for item in input_command:
             command = command + item
         if len(command) == 1:
@@ -56,6 +56,7 @@ class LedController(object):
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.sendto(command, (self.ip, self.port))
+        sock.close()
 
     def send_to_group(self, group, command, send_on=True, retries=None):
         if retries is None:
@@ -103,7 +104,7 @@ class LedController(object):
             percent = 100
         # Map 0-100 to 2-27
         value = int(2 + ((float(percent) / 100) * 25))
-        self.send_to_group(group, ("\x4e", chr(value)))
+        self.send_to_group(group, (b"\x4e", bytes([value])))
 
     def disco(self, group=None):
         self.send_to_group(group, self.COMMANDS["disco"], True, 1)
