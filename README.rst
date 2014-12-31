@@ -3,13 +3,15 @@ Wi-Fi LED controller
 
 Controller for LimitlessLED RGBW lights (should be compatible with easybulb/milight as well).
 
-Installation:
+Installation
+------------
 
 ::
 
   pip install ledcontroller
 
-Usage:
+Usage
+-----
 
 ::
 
@@ -22,3 +24,11 @@ Usage:
   led.disco(3)
   led.disco_faster(3)
   led.off(4)
+
+Notes
+-----
+
+- There is automatic 100ms pause between each command. Almost every action requires sending more than one command, thus requiring several hundred milliseconds.
+- As the gateway seems to be rather unreliable, all commands are sent multiple times (three by default). If you want to change this, use "LedController(ip, repeat_commands=n)" to create new lightcontroller object.
+- If for some reason you need to change gateway port, use keyword port= to change it.
+- Run testsuite with "python setup.py test". Tests only run the code without checking whether proper commands were sent.

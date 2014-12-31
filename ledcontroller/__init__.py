@@ -2,9 +2,6 @@
 import socket
 import time
 
-wifi_bridge_ip = "192.168.1.111"
-wifi_bridge_port = 8899
-
 class LedController(object):
     GROUP_ON =  ["\x45", "\x47", "\x49", "\x4b"]
     GROUP_OFF = ["\x46", "\x48", "\x4a", "\x4c"]
@@ -34,17 +31,20 @@ class LedController(object):
      "color_to_lavendar": ("\x40", "\xf0"),
     }
 
-    def __init__(self, ip, port=8899, repeat_commands=3):
+    def __init__(self, ip, **kwargs):
         self.ip = ip
-        self.port = port
+        self.port = int(kwargs.get("port", 8899))
         self.last_command_at = 0
-        self.repeat_commands = repeat_commands
+        self.repeat_commands = int(kwargs.get("repeat_commands", 3))
+        if self.repeat_commands == 0:
+            self.repeat_commands = 1
+        self.pause_between_commands = float(kwargs.get("pause_between_commands", 0.1))
 
     def send_command(self, input_command):
         time_since_last_command = time.time() - self.last_command_at
-        if time_since_last_command < 0.100:
+        if time_since_last_command < self.pause_between_commands:
             # Lights require 100ms pause between commands to function at least almost reliably.
-            time.sleep(0.1 - time_since_last_command)
+            time.sleep(self.pause_between_commands - time_since_last_command)
         self.last_command_at = time.time()
         command = ""
         for item in input_command:
