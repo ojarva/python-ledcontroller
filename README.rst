@@ -1,6 +1,8 @@
 Wi-Fi LED controller
 ====================
 
+
+
 Controller for LimitlessLED RGBW lights (should be compatible with easybulb/milight as well).
 
 Installation
@@ -28,7 +30,7 @@ Usage
 Notes
 -----
 
-- There is automatic 100ms pause between each command. Almost every action requires sending more than one command, thus requiring several hundred milliseconds.
+- There is automatic 100ms pause between each command. Almost every action requires sending more than one command, thus requiring several hundred milliseconds. You can change this with keyword argument "pause_between_commands". However, decreasing the delay will cause some commands to fail.
 - As the gateway seems to be rather unreliable, all commands are sent multiple times (three by default). If you want to change this, use "LedController(ip, repeat_commands=n)" to create new lightcontroller object.
 - If for some reason you need to change gateway port, use keyword port= to change it.
 - Run testsuite with "python setup.py test". Tests only run the code without checking whether proper commands were sent.
