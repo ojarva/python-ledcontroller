@@ -75,7 +75,10 @@ class TestLights(unittest.TestCase):
         led = self.get_test_led()
         self.assertRaises(AttributeError, led.set_color, "red", 5)
 
-
+    def test_nightmode(self):
+        led = self.get_test_led()
+        led.nightmode()
+        led.nightmode(1)
 
 if __name__ == '__main__':
     unittest.main()

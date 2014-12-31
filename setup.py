@@ -9,7 +9,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='ledcontroller',
-    version='1.0.2',
+    version='1.0.3',
     description='Controller library for limitlessled/easybulb/milight Wi-Fi LEDs',
     long_description=long_description,
     url='https://github.com/ojarva/python-ledcontroller',
