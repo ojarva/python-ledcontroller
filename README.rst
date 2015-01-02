@@ -4,6 +4,9 @@ Wi-Fi LED controller
 .. image:: https://travis-ci.org/ojarva/python-ledcontroller.svg?branch=master
     :target: https://travis-ci.org/ojarva/python-ledcontroller
 
+.. image:: https://pypip.in/v/ledcontroller/badge.png
+    :target: https://pypi.python.org/pypi/ledcontroller
+
 Controller for LimitlessLED RGBW lights (should be compatible with easybulb/milight as well).
 
 Before using this, you need to use smartphone/tablet app to configure light groups to the gateway. Configuring remotes has nothing to do with configuring the gateway. You can not mix white lights and RGBW lights to same group.
