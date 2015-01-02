@@ -29,8 +29,8 @@ class LedController(object):
     led.set_color("red", 2)
     led.set_brightness(50, 2)
     """
-    GROUP_ON =  [(b"\x45",), (b"\x47",), (b"\x49",), (b"\x4b",)]
-    GROUP_OFF = [(b"\x46",), (b"\x48",), (b"\x4a",), (b"\x4c",)]
+    GROUP_X_ON =  [(b"\x45",), (b"\x47",), (b"\x49",), (b"\x4b",)]
+    GROUP_X_OFF = [(b"\x46",), (b"\x48",), (b"\x4a",), (b"\x4c",)]
     GROUP_X_TO_WHITE = [(b"\xc5",), (b"\xc7",), (b"\xc9",), (b"\xcb",)]
     GROUP_X_NIGHTMODE = [(b"\xc6",), (b"\xc8",), (b"\xca",), (b"\xcc",)]
     COMMANDS = {
@@ -73,6 +73,18 @@ class LedController(object):
             self.repeat_commands = 1
         self.pause_between_commands = float(kwargs.get("pause_between_commands", 0.1))
 
+    def send_per_group_command(self, commandset, group):
+        """ You shouldn't use this method directly.
+
+            Sends a single command to specified group.
+            commandset should be list of per-group commands.
+            group must be >0 and <5.
+        """
+        if group < 1 or group > 4:
+            raise AttributeError("Group must be between 1 and 4 (was %s)" % group)
+        return self.send_command(commandset[group-1])
+
+
     def send_command(self, input_command):
         """ You shouldn't use this method directly.
 
@@ -104,16 +116,15 @@ class LedController(object):
         if retries is None:
             retries = self.repeat_commands
         for _ in range(retries):
+            if send_on:
+                self.on(group)
             if group is None or group == 0:
-                if send_on:
-                    self.send_command(self.COMMANDS["all_on"])
                 self.send_command(command)
-            elif group < 1 or group > 4:
-                raise AttributeError("Group must be between 1 and 4 (was %s)" % group)
             else:
-                if send_on:
-                    self.send_command(self.GROUP_ON[group-1])
-                self.send_command(command)
+                if isinstance(command, list):
+                    self.send_per_group_command(command, group)
+                else:
+                    self.send_command(command)
 
     def on(self, group=None):
         """ Switches lights on. If group (1-4) is not specified,
@@ -121,7 +132,7 @@ class LedController(object):
         if group is None or group == 0:
             self.send_to_group(group, self.COMMANDS["all_on"], False)
             return
-        self.send_to_group(group, self.GROUP_ON[group-1], False)
+        self.send_to_group(group, self.GROUP_X_ON, False)
 
     def off(self, group=None):
         """ Switches lights off. If group (1-4) is not specified,
@@ -129,7 +140,7 @@ class LedController(object):
         if group is None or group == 0:
             self.send_to_group(group, self.COMMANDS["all_off"], False)
             return
-        self.send_to_group(group, self.GROUP_OFF[group-1], False)
+        self.send_to_group(group, self.GROUP_X_OFF, False)
 
     def white(self, group=None):
         """ Switches lights on and changes color to white.
@@ -138,7 +149,7 @@ class LedController(object):
         if group is None or group == 0:
             self.send_to_group(group, self.COMMANDS["all_white"])
             return
-        self.send_to_group(group, self.GROUP_X_TO_WHITE[group-1])
+        self.send_to_group(group, self.GROUP_X_TO_WHITE)
 
     def set_color(self, color, group=None):
         """ Switches lights on and changes color. Available colors:
@@ -166,21 +177,31 @@ class LedController(object):
             self.white(group)
         else:
             self.send_to_group(group, self.COMMANDS["color_to_"+color])
+        return color
 
     def set_brightness(self, percent, group=None):
-        """ Sets brightness. Percent is int between 0 (minimum brightness) and 100 (maximum brightness).
+        """ Sets brightness.
+
+            Percent is int between 0 (minimum brightness) and 100 (maximum brightness), or
+            float between 0 (minimum brightness) and 1.0 (maximum brightness).
 
             See also .nightmode().
 
             If group (1-4) is not specified, brightness of all four groups will be adjusted.
             """
-        if percent < 0:
-            percent = 0
-        if percent > 100:
-            percent = 100
+        # If input is float, assume it is percent value from 0 to 1.
+        if isinstance(percent, float):
+            if percent > 1:
+                percent = int(percent)
+            else:
+                percent = int(percent * 100)
+        # Clamp to appropriate range.
+        percent = min(100, max(0, percent))
+
         # Map 0-100 to 2-27
         value = int(2 + ((float(percent) / 100) * 25))
         self.send_to_group(group, (b"\x4e", bytes([value])))
+        return percent
 
     def disco(self, group=None):
         """ Starts disco mode. The command is executed only once, as multiple commands would cycle
@@ -226,12 +247,11 @@ class LedController(object):
             The command is sent only once, as multiple commands would blink lights rapidly.
             There is no way to automatically detect whether transmitting the command succeeded or not.
             """
-        if group is None or group == 0:
-            self.off()
-            self.send_command(self.COMMANDS["all_nightmode"])
-            return
         self.off(group)
-        self.send_command(self.GROUP_X_NIGHTMODE[group-1])
+        if group is None or group == 0:
+            self.send_command(self.COMMANDS["all_nightmode"])
+        else:
+            self.send_per_group_command(self.GROUP_X_NIGHTMODE, group)
 
 def main():
     led = LedController("192.168.1.6")

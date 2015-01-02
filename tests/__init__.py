@@ -2,8 +2,8 @@ import unittest
 from ledcontroller import LedController
 
 class TestLights(unittest.TestCase):
-    def get_test_led(self):
-        return LedController("127.0.0.1", pause_between_commands=0, repeat_commands=0)
+    def setUp(self):
+        self.led = LedController("127.0.0.1", pause_between_commands=0, repeat_commands=0)
 
     def test_default_constructor(self):
         led = LedController("127.0.0.1")
@@ -32,53 +32,51 @@ class TestLights(unittest.TestCase):
         self.assertEqual(led.repeat_commands, 1)
 
     def test_on(self):
-        led = self.get_test_led()
-        led.on()
-        led.on(1)
+        self.led.on()
+        self.led.on(1)
 
     def test_off(self):
-        led = self.get_test_led()
-        led.off()
-        led.off(2)
+        self.led.off()
+        self.led.off(2)
 
     def test_white(self):
-        led = self.get_test_led()
-        led.white()
+        self.led.white()
         for a in range(5):
-            led.white(a)
-        led.white(None)
+            self.led.white(a)
+        self.led.white(None)
 
     def test_set_color(self):
-        led = self.get_test_led()
-        led.set_color("white")
-        led.set_color("red")
+        self.led.set_color("white")
+        self.led.set_color("red")
 
     def test_set_brightness(self):
-        led = self.get_test_led()
-        led.set_brightness(-1)
-        led.set_brightness(101)
-        led.set_brightness(50)
+        self.assertEquals(self.led.set_brightness(-1), 0)
+        self.assertEquals(self.led.set_brightness(101), 100)
+        self.assertEquals(self.led.set_brightness(50), 50)
+
+    def test_set_brightness_float(self):
+        self.assertEquals(self.led.set_brightness(0.1), 10)
+        self.assertEquals(self.led.set_brightness(1.0), 100)
+        self.assertEquals(self.led.set_brightness(50.0), 50)
 
     def test_disco(self):
-        led = self.get_test_led()
-        led.disco(1)
+        self.led.disco(1)
+        self.led.disco()
 
     def test_disco_faster(self):
-        led = self.get_test_led()
-        led.disco_faster(1)
+        self.led.disco_faster(1)
+        self.led.disco_faster()
 
     def test_disco_slower(self):
-        led = self.get_test_led()
-        led.disco_slower(1)
+        self.led.disco_slower(1)
+        self.led.disco_slower()
 
     def test_invalid_group(self):
-        led = self.get_test_led()
-        self.assertRaises(AttributeError, led.set_color, "red", 5)
+        self.assertRaises(AttributeError, self.led.set_color, "red", 5)
 
     def test_nightmode(self):
-        led = self.get_test_led()
-        led.nightmode()
-        led.nightmode(1)
+        self.led.nightmode()
+        self.led.nightmode(1)
 
 if __name__ == '__main__':
     unittest.main()
