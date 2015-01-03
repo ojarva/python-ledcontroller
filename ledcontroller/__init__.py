@@ -42,7 +42,7 @@ class LedController(object):
      "warmer": (b"\x3e",),
      "cooler": (b"\x3f",),
      "brightness_up": (b"\x3c",),
-     "brightness_down": (b"\x34"),
+     "brightness_down": (b"\x34",),
     }
 
     WHITE_GROUP_X_ON = [(b"\x38",), (b"\x3d",), (b"\x37",), (b"\x32",)]
