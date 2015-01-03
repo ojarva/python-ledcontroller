@@ -320,9 +320,42 @@ class LedController(object):
         else:
             self._send_to_group(group, per_group=True, rgbw_cmd=self.RGBW_GROUP_X_NIGHTMODE, white_cmd=self.WHITE_GROUP_X_NIGHTMODE, send_on=False, retries=1)
 
+    def batch_run(self, *commands):
+        """ Run batch of commands in sequence.
+
+            Input is positional arguments with (function pointer, *args) tuples.
+
+            This method is useful for executing commands to multiple groups with retries,
+            without having too long delays. For example,
+
+            - Set group 1 to red and brightness to 10%
+            - Set group 2 to red and brightness to 10%
+            - Set group 3 to white and brightness to 100%
+            - Turn off group 4
+
+            With three repeats, running these consecutively takes approximately 100ms * 13 commands * 3 times = 3.9 seconds.
+
+            With batch_run, execution takes same time, but first loop - each command is sent once to every group -
+            is finished within 1.3 seconds. After that, command is repeated two times.
+
+            Usage:
+
+            led.batch_run((led.set_color, "red", 1), (led.set_brightness, 10, 1), (led.set_color, "white", 3), ...)
+        """
+        original_retries = self.repeat_commands
+        self.repeat_commands = 1
+        for retries in range(original_retries):
+            for command in commands:
+                cmd = command[0]
+                args = command[1:]
+                cmd(*args)
+        self.repeat_commands = original_retries
+
+
 def main():
     led = LedController("192.168.1.6")
-    led.set_color("red", 3)
+    led.batch_run((led.disco, 3), (led.set_brightness, 10, 3), (led.set_color, "red", 3))
+#    led.set_color("red", 3)
 
 if __name__ == '__main__':
     main()
