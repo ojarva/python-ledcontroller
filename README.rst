@@ -29,13 +29,31 @@ Usage
 
   import ledcontroller
   led = ledcontroller.LedController("192.168.1.6")
+  led.off() # Switches all groups off
+  led.set_color("red", 1) # Switches group 1 on and changes color to red.
+  led.white(2) # Group 2 on and color to white.
+  led.set_brightness(50, 2) # Group 2 on and brightness to 50%.
+  led.disco(3) # Group 3 on and enable disco mode.
+  led.disco_faster(3) # Group 3 on and adjust disco mode speed.
+  led.on(4) # Switch group 4 on. Bulb automatically restores previous color and brightness.
+
+Using both white and RGBW bulbs:
+
+::
+
+  import ledcontroller
+  # By default, all groups are RGBW bulbs.
+  led = ledcontroller.LedController("192.168.1.6", group_1="white", group_4="white")
   led.on()
-  led.set_color("red", 1)
-  led.white(2)
-  led.set_brightness(50, 2)
-  led.disco(3)
-  led.disco_faster(3)
-  led.off(4)
+  led.white(2) # Switches RGBW group on and changes color to white.
+  led.white(1) # Turns white group on.
+  led.warmer() # Adjusts all white groups to warmer color. Switches all groups on.
+  led.cooler(1) # Adjusts group 1 white bulbs to cooler color.
+  led.brightness_up() # Adjusts white group brightness up. Does not affect RGBW lights.
+  led.brightness_up(2) # Does nothing to RGBW bulbs.
+  led.brightness_up(4) # Adjusts group 4 brightness.
+  led.set_brightness(50) # Adjusts all RGBW bulbs to 50%. Does not affect white lights.
+
 
 Notes
 -----
@@ -44,3 +62,4 @@ Notes
 - As the gateway seems to be rather unreliable, all commands are sent multiple times (three by default). If you want to change this, use "LedController(ip, repeat_commands=n)" to create new lightcontroller object.
 - If for some reason you need to change gateway port, use keyword port= to change it.
 - Run testsuite with "python setup.py test". Tests only run the code without checking whether proper commands were sent.
+- RGBW/white bulb commands differ a bit. Obviously, it is not possible to change color for white bulbs. For white bulbs, there is no absolute brightness settings. Similarly, only white bulbs allow adjusting color temperature (with .cooler and .warmer). There is 10 steps for white bulb brightness and color temperature.

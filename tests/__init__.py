@@ -1,7 +1,71 @@
 import unittest
 from ledcontroller import LedController
 
-class TestLights(unittest.TestCase):
+class TestWhiteLights(unittest.TestCase):
+    def setUp(self):
+        self.led = LedController("127.0.0.1", pause_between_commands=0, repeat_commands=0, group_1="white", group_2="white", group_3="white", group_4="white")
+
+    def test_on(self):
+        self.led.on()
+        self.led.on(1)
+
+    def test_off(self):
+        self.led.off()
+        self.led.off(2)
+
+    def test_white(self):
+        self.led.white()
+        for a in range(5):
+            self.led.white(a)
+        self.led.white(None)
+
+    def test_set_color(self):
+        self.led.set_color("white")
+        self.led.set_color("red")
+
+    def test_set_brightness(self):
+        self.assertEquals(self.led.set_brightness(-1), 0)
+        self.assertEquals(self.led.set_brightness(101), 100)
+        self.assertEquals(self.led.set_brightness(50), 50)
+
+    def test_set_brightness_float(self):
+        self.assertEquals(self.led.set_brightness(0.1), 10)
+        self.assertEquals(self.led.set_brightness(1.0), 100)
+        self.assertEquals(self.led.set_brightness(50.0), 50)
+
+    def test_disco(self):
+        self.led.disco(1)
+        self.led.disco()
+
+    def test_disco_faster(self):
+        self.led.disco_faster(1)
+        self.led.disco_faster()
+
+    def test_disco_slower(self):
+        self.led.disco_slower(1)
+        self.led.disco_slower()
+
+    def test_nightmode(self):
+        self.led.nightmode()
+        self.led.nightmode(1)
+
+    def test_warmer(self):
+        self.led.warmer()
+        self.led.warmer(1)
+
+    def test_cooler(self):
+        self.led.cooler()
+        self.led.cooler(4)
+
+    def test_brightness_up(self):
+        self.led.brightness_up()
+        self.led.brightness_up(4)
+
+    def test_brightness_down(self):
+        self.led.brightness_down()
+        self.led.brightness_down(4)
+
+class TestRgbwLights(unittest.TestCase):
     def setUp(self):
         self.led = LedController("127.0.0.1", pause_between_commands=0, repeat_commands=0)
 
@@ -77,6 +141,86 @@ class TestLights(unittest.TestCase):
     def test_nightmode(self):
         self.led.nightmode()
         self.led.nightmode(1)
+
+    def test_warmer(self):
+        self.led.warmer()
+        self.led.warmer(1)
+
+    def test_cooler(self):
+        self.led.cooler()
+        self.led.cooler(4)
+
+    def test_brightness_up(self):
+        self.led.brightness_up()
+        self.led.brightness_up(4)
+
+    def test_brightness_down(self):
+        self.led.brightness_down()
+        self.led.brightness_down(4)
+
+class TestCombinedSetup(unittest.TestCase):
+    def setUp(self):
+        self.led = LedController("127.0.0.1", pause_between_commands=0, repeat_commands=0, group_1="rgbw", group_2="white", group_3="rgbw", group_4="white")
+
+    def test_on(self):
+        self.led.on()
+        self.led.on(1)
+
+    def test_off(self):
+        self.led.off()
+        self.led.off(2)
+
+    def test_white(self):
+        self.led.white()
+        for a in range(5):
+            self.led.white(a)
+        self.led.white(None)
+
+    def test_set_color(self):
+        self.led.set_color("white")
+        self.led.set_color("red")
+
+    def test_set_brightness(self):
+        self.assertEquals(self.led.set_brightness(-1), 0)
+        self.assertEquals(self.led.set_brightness(101), 100)
+        self.assertEquals(self.led.set_brightness(50), 50)
+
+    def test_set_brightness_float(self):
+        self.assertEquals(self.led.set_brightness(0.1), 10)
+        self.assertEquals(self.led.set_brightness(1.0), 100)
+        self.assertEquals(self.led.set_brightness(50.0), 50)
+
+    def test_disco(self):
+        self.led.disco(1)
+        self.led.disco()
+
+    def test_disco_faster(self):
+        self.led.disco_faster(1)
+        self.led.disco_faster()
+
+    def test_disco_slower(self):
+        self.led.disco_slower(1)
+        self.led.disco_slower()
+
+    def test_nightmode(self):
+        self.led.nightmode()
+        self.led.nightmode(1)
+
+    def test_warmer(self):
+        self.led.warmer()
+        self.led.warmer(1)
+
+    def test_cooler(self):
+        self.led.cooler()
+        self.led.cooler(4)
+
+    def test_brightness_up(self):
+        self.led.brightness_up()
+        self.led.brightness_up(4)
+
+    def test_brightness_down(self):
+        self.led.brightness_down()
+        self.led.brightness_down(4)
 
 if __name__ == '__main__':
     unittest.main()

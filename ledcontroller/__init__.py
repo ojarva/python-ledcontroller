@@ -1,9 +1,11 @@
 """
-Library for controlling limitless/milight/easybulb RGBW leds.
+Library for controlling limitless/milight/easybulb RGBW/white leds bulbs.
 
-Currently only RGBW commandset is implemented. Before using this, you need to use
-smartphone/tablet app to configure light groups to the gateway. Configuring remotes
-does not enable same groups on the gateway.
+Both white and RGBW commandsets are implemented. Older RGB lights are not supported.
+
+Before using this library, you need to use smartphone/tablet app to configure
+light groups to the gateway. Configuring remotes does not enable same groups
+on the gateway.
 
 See https://github.com/ojarva/python-ledcontroller for more information.
 
@@ -11,9 +13,11 @@ Based on the documentation available at http://www.limitlessled.com/dev/ .
 """
 
 import socket
+import struct
 import time
 
 __all__ = ["LedController"]
+
 
 class LedController(object):
     """
@@ -29,11 +33,29 @@ class LedController(object):
     led.set_color("red", 2)
     led.set_brightness(50, 2)
     """
-    GROUP_X_ON =  [(b"\x45",), (b"\x47",), (b"\x49",), (b"\x4b",)]
-    GROUP_X_OFF = [(b"\x46",), (b"\x48",), (b"\x4a",), (b"\x4c",)]
-    GROUP_X_TO_WHITE = [(b"\xc5",), (b"\xc7",), (b"\xc9",), (b"\xcb",)]
-    GROUP_X_NIGHTMODE = [(b"\xc6",), (b"\xc8",), (b"\xca",), (b"\xcc",)]
-    COMMANDS = {
+
+    WHITE_COMMANDS = {
+     "all_on": (b"\x35",),
+     "all_off": (b"\x39",),
+     "all_full": (b"\xb5",),
+     "all_nightmode": (b"\xb9",),
+     "warmer": (b"\x3e",),
+     "cooler": (b"\x3f",),
+     "brightness_up": (b"\x3c",),
+     "brightness_down": (b"\x34"),
+    }
+
+    WHITE_GROUP_X_ON = [(b"\x38",), (b"\x3d",), (b"\x37",), (b"\x32",)]
+    WHITE_GROUP_X_OFF = [(b"\x3b",), (b"\x33",), (b"\x3a",), (b"\x36",)]
+    WHITE_GROUP_X_FULL = [(b"\xb8",), (b"\xbd",), (b"\xb7",), (b"\xb2",)]
+    WHITE_GROUP_X_NIGHTMODE = [(b"\xbb",), (b"\xb3",), (b"\xba",), (b"\xb6",)]
+
+
+    RGBW_GROUP_X_ON =  [(b"\x45",), (b"\x47",), (b"\x49",), (b"\x4b",)]
+    RGBW_GROUP_X_OFF = [(b"\x46",), (b"\x48",), (b"\x4a",), (b"\x4c",)]
+    RGBW_GROUP_X_TO_WHITE = [(b"\xc5",), (b"\xc7",), (b"\xc9",), (b"\xcb",)]
+    RGBW_GROUP_X_NIGHTMODE = [(b"\xc6",), (b"\xc8",), (b"\xca",), (b"\xcc",)]
+    RGBW_COMMANDS = {
      "all_on": (b"\x42",),
      "all_off": (b"\x41",),
      "all_white": (b"\xc2",),
@@ -65,6 +87,16 @@ class LedController(object):
             - port (default 8899): UDP port on wifi gateway
             - pause_between_commands (default 0.1 (in seconds)): how long pause there should be between sending commands to the gateway.
             """
+        self.group = {1: kwargs.get("group_1", "rgbw"),
+                       2: kwargs.get("group_2", "rgbw"),
+                       3: kwargs.get("group_3", "rgbw"),
+                       4: kwargs.get("group_4", "rgbw")}
+        self.has_white = False
+        self.has_rgbw = False
+        if "white" in self.group.values():
+            self.has_white = True
+        if "rgbw" in self.group.values():
+            self.has_rgbw = True
         self.ip = ip
         self.port = int(kwargs.get("port", 8899))
         self.last_command_at = 0
@@ -73,24 +105,14 @@ class LedController(object):
             self.repeat_commands = 1
         self.pause_between_commands = float(kwargs.get("pause_between_commands", 0.1))
 
-    def send_per_group_command(self, commandset, group):
-        """ You shouldn't use this method directly.
-
-            Sends a single command to specified group.
-            commandset should be list of per-group commands.
-            group must be >0 and <5.
-        """
-        if group < 1 or group > 4:
-            raise AttributeError("Group must be between 1 and 4 (was %s)" % group)
-        return self.send_command(commandset[group-1])
-
-
-    def send_command(self, input_command):
+    def _send_command(self, input_command):
         """ You shouldn't use this method directly.
 
             Sends a single command. If previous command was sent
             recently, sleep for 100ms (configurable with pause_between_commands
             constructor keyword). """
+        if input_command is None:
+            return
         time_since_last_command = time.time() - self.last_command_at
         if time_since_last_command < self.pause_between_commands:
             # Lights require 100ms pause between commands to function at least almost reliably.
@@ -107,49 +129,62 @@ class LedController(object):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.sendto(command, (self.ip, self.port))
         sock.close()
+        return command
 
-    def send_to_group(self, group, command, send_on=True, retries=None):
+    def _send_to_group(self, group, **kwargs):
         """ You shouldn't use this method directly.
 
         Sends a single command to specific group.
+
+        Handles automatically sending command to white or rgbw group.
         """
-        if retries is None:
-            retries = self.repeat_commands
+        retries = kwargs.get("retries", self.repeat_commands)
         for _ in range(retries):
-            if send_on:
+            if kwargs.get("send_on", True):
                 self.on(group)
             if group is None or group == 0:
-                self.send_command(command)
+                if self.has_white:
+                    self._send_command(self.WHITE_COMMANDS.get(kwargs["command"]))
+                if self.has_rgbw:
+                    self._send_command(self.RGBW_COMMANDS.get(kwargs["command"]))
             else:
-                if isinstance(command, list):
-                    self.send_per_group_command(command, group)
+                if group < 1 or group > 4:
+                    raise AttributeError("Group must be between 1 and 4 (was %s)" % group)
+                if kwargs.get("per_group"):
+                    self._send_command(kwargs.get("%s_cmd" % self.group[group], [None, None, None, None])[group-1])
                 else:
-                    self.send_command(command)
+                    if self.group[group] == "white":
+                        cmd_tmp = self.WHITE_COMMANDS
+                    elif self.group[group] == "rgbw":
+                        cmd_tmp = self.RGBW_COMMANDS
+                    else:
+                        raise NotImplementedError("Invalid group type: %s" % self.group[group])
+                    self._send_command(cmd_tmp.get(kwargs["command"]))
 
     def on(self, group=None):
         """ Switches lights on. If group (1-4) is not specified,
             all four groups will be switched on. """
         if group is None or group == 0:
-            self.send_to_group(group, self.COMMANDS["all_on"], False)
+            self._send_to_group(group, send_on=False, command="all_on")
             return
-        self.send_to_group(group, self.GROUP_X_ON, False)
+        self._send_to_group(group, per_group=True, white_cmd=self.WHITE_GROUP_X_ON, rgbw_cmd=self.RGBW_GROUP_X_ON, send_on=False)
 
     def off(self, group=None):
         """ Switches lights off. If group (1-4) is not specified,
             all four groups will be switched off. """
         if group is None or group == 0:
-            self.send_to_group(group, self.COMMANDS["all_off"], False)
+            self._send_to_group(group, send_on=False, command="all_off")
             return
-        self.send_to_group(group, self.GROUP_X_OFF, False)
+        self._send_to_group(group, per_group=True, send_on=False, rgbw_cmd=self.RGBW_GROUP_X_OFF, white_cmd=self.WHITE_GROUP_X_OFF)
 
     def white(self, group=None):
         """ Switches lights on and changes color to white.
             If group (1-4) is not specified, all four groups
             will be switched on and to white. """
         if group is None or group == 0:
-            self.send_to_group(group, self.COMMANDS["all_white"])
+            self._send_to_group(group, command="all_white")
             return
-        self.send_to_group(group, self.GROUP_X_TO_WHITE)
+        self._send_to_group(group, per_group=True, rgbw_cmd=self.RGBW_GROUP_X_TO_WHITE)
 
     def set_color(self, color, group=None):
         """ Switches lights on and changes color. Available colors:
@@ -176,8 +211,36 @@ class LedController(object):
         if color == "white": # hack, as commands for setting color to white differ from other colors.
             self.white(group)
         else:
-            self.send_to_group(group, self.COMMANDS["color_to_"+color])
+            self._send_to_group(group, command="color_to_"+color)
         return color
+
+    def brightness_up(self, group=None):
+        """ Adjusts white bulb brightness up.
+
+        Calling this method for RGBW lights won't
+        have any effect on the brightness."""
+        self._send_to_group(group, command="brightness_down")
+
+    def brightness_down(self, group=None):
+        """ Adjusts white bulb brightness down.
+
+        Calling this method for RGBW lights won't
+        have any effect on the brightness."""
+        self._send_to_group(group, command="brightness_up")
+
+    def cooler(self, group=None):
+        """ Adjusts white bulb to cooler color temperature.
+
+        Calling this method for RGBW lights won't
+        have any effect. """
+        self._send_to_group(group, command="cooler")
+
+    def warmer(self, group=None):
+        """ Adjusts white bulb to warmer color temperature.
+
+        Calling this method for RGBW lights won't
+        have any effect. """
+        self._send_to_group(group, command="warmer")
 
     def set_brightness(self, percent, group=None):
         """ Sets brightness.
@@ -200,7 +263,8 @@ class LedController(object):
 
         # Map 0-100 to 2-27
         value = int(2 + ((float(percent) / 100) * 25))
-        self.send_to_group(group, (b"\x4e", bytes([value])))
+        self.on(group)
+        self._send_command((b"\x4e", struct.pack("B", value)))
         return percent
 
     def disco(self, group=None):
@@ -231,15 +295,15 @@ class LedController(object):
             20. All of the above in an endless cycle.
 
             (Above list is copied from http://www.limitlessled.com/faqs/how-is-limitlessled-better-than-greenwave-led/)."""
-        self.send_to_group(group, self.COMMANDS["disco"], True, 1)
+        self._send_to_group(group, command="disco", retries=1)
 
     def disco_faster(self, group=None):
         """ Adjusts up the speed of disco mode (if enabled; does not start disco mode). """
-        self.send_to_group(group, self.COMMANDS["disco_faster"], True, 1)
+        self._send_to_group(group, command="disco_faster", retries=1)
 
     def disco_slower(self, group=None):
         """ Adjusts down the speed of disco mode (if enabled; does not start disco mode). """
-        self.send_to_group(group, self.COMMANDS["disco_slower"], True, 1)
+        self._send_to_group(group, command="disco_slower", retries=1)
 
     def nightmode(self, group=None):
         """ Enables nightmode (very dim white light).
@@ -249,14 +313,16 @@ class LedController(object):
             """
         self.off(group)
         if group is None or group == 0:
-            self.send_command(self.COMMANDS["all_nightmode"])
+            if self.has_rgbw:
+                self._send_command(self.RGBW_COMMANDS["all_nightmode"])
+            if self.has_white:
+                self._send_command(self.WHITE_COMMANDS["all_nightmode"])
         else:
-            self.send_per_group_command(self.GROUP_X_NIGHTMODE, group)
+            self._send_to_group(group, per_group=True, rgbw_cmd=self.RGBW_GROUP_X_NIGHTMODE, white_cmd=self.WHITE_GROUP_X_NIGHTMODE, send_on=False, retries=1)
 
 def main():
     led = LedController("192.168.1.6")
-    led.set_color("red")
-    led.set_brightness(100)
+    led.set_color("red", 3)
 
 if __name__ == '__main__':
     main()
