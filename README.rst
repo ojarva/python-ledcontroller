@@ -44,6 +44,7 @@ Using both white and RGBW bulbs:
   import ledcontroller
   # By default, all groups are RGBW bulbs.
   led = ledcontroller.LedController("192.168.1.6", group_1="white", group_4="white")
+  led.set_group_type(1, "white") # This is same as using constructor keyword group_1.
   led.on()
   led.white(2) # Switches RGBW group on and changes color to white.
   led.white(1) # Turns white group on.
@@ -53,7 +54,6 @@ Using both white and RGBW bulbs:
   led.brightness_up(2) # Does nothing to RGBW bulbs.
   led.brightness_up(4) # Adjusts group 4 brightness.
   led.set_brightness(50) # Adjusts all RGBW bulbs to 50%. Does not affect white lights.
-
 
 Notes
 -----

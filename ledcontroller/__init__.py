@@ -86,17 +86,13 @@ class LedController(object):
             - repeat_commands (default 3): how many times safe commands are repeated to ensure successful execution.
             - port (default 8899): UDP port on wifi gateway
             - pause_between_commands (default 0.1 (in seconds)): how long pause there should be between sending commands to the gateway.
+            - group_1, group_2, ...: set bulb type for group.
             """
-        self.group = {1: kwargs.get("group_1", "rgbw"),
-                       2: kwargs.get("group_2", "rgbw"),
-                       3: kwargs.get("group_3", "rgbw"),
-                       4: kwargs.get("group_4", "rgbw")}
+        self.group = {}
         self.has_white = False
         self.has_rgbw = False
-        if "white" in self.group.values():
-            self.has_white = True
-        if "rgbw" in self.group.values():
-            self.has_rgbw = True
+        for a in range(1, 5):
+            self.set_group_type(a, kwargs.get("group_%s" % a, "rgbw"))
         self.ip = ip
         self.port = int(kwargs.get("port", 8899))
         self.last_command_at = 0
@@ -104,6 +100,32 @@ class LedController(object):
         if self.repeat_commands == 0:
             self.repeat_commands = 1
         self.pause_between_commands = float(kwargs.get("pause_between_commands", 0.1))
+
+    def get_group_type(self, group):
+        """ Gets bulb type for specified group.
+
+        Group must be int between 1 and 4.
+        """
+        return self.group[group]
+
+    def set_group_type(self, group, type):
+        """ Sets bulb type for specified group.
+
+        Group must be int between 1 and 4.
+
+        Type must be "rgbw" or "white".
+
+        Alternatively, use constructor keywords group_1, group_2 etc. to set bulb types.
+        """
+        self.group[group] = type
+        if "white" in self.group.values():
+            self.has_white = True
+        else:
+            self.has_white = False
+        if "rgbw" in self.group.values():
+            self.has_rgbw = True
+        else:
+            self.has_rgbw = False
 
     def _send_command(self, input_command):
         """ You shouldn't use this method directly.
@@ -151,14 +173,14 @@ class LedController(object):
                 if group < 1 or group > 4:
                     raise AttributeError("Group must be between 1 and 4 (was %s)" % group)
                 if kwargs.get("per_group"):
-                    self._send_command(kwargs.get("%s_cmd" % self.group[group], [None, None, None, None])[group-1])
+                    self._send_command(kwargs.get("%s_cmd" % self.get_group_type(group), [None, None, None, None])[group-1])
                 else:
-                    if self.group[group] == "white":
+                    if self.get_group_type(group) == "white":
                         cmd_tmp = self.WHITE_COMMANDS
-                    elif self.group[group] == "rgbw":
+                    elif self.get_group_type(group) == "rgbw":
                         cmd_tmp = self.RGBW_COMMANDS
                     else:
-                        raise NotImplementedError("Invalid group type: %s" % self.group[group])
+                        raise NotImplementedError("Invalid group type: %s" % self.get_group_type(group))
                     self._send_command(cmd_tmp.get(kwargs["command"]))
 
     def on(self, group=None):
