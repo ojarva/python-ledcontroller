@@ -9,11 +9,11 @@ Wi-Fi LED controller
 
 Controller for LimitlessLED RGBW lights (should be compatible with easybulb/milight as well).
 
-Before using this, you need to use smartphone/tablet app to configure light groups to the gateway. Configuring remotes has nothing to do with configuring the gateway. You can not mix white lights and RGBW lights to same group.
+Before using this code, you need to configure your gateway to connect to wifi. After that, configure light groups to the gateway. Configuring remotes has nothing to do with configuring the gateway.
 
 See `github repository <https://github.com/ojarva/python-ledcontroller>`_ for more information.
 
-The code is based on the documentation available at `limitlessled.com <http://www.limitlessled.com/dev/>`_
+The code is based on the documentation available at `limitlessled.com/dev/ <http://www.limitlessled.com/dev/>`_
 
 Installation
 ------------
@@ -59,7 +59,7 @@ Notes
 -----
 
 - There is automatic 100ms pause between each command. Almost every action requires sending more than one command, thus requiring several hundred milliseconds. You can change this with keyword argument "pause_between_commands". However, decreasing the delay will cause some commands to fail.
-- As the gateway seems to be rather unreliable, all commands are sent multiple times (three by default). If you want to change this, use "LedController(ip, repeat_commands=n)" to create new lightcontroller instance..
+- As the gateway seems to be rather unreliable, all commands are sent multiple times (three by default). If you want to change this, use "LedController(ip, repeat_commands=n)" to create new lightcontroller instance. It is not possible to retrieve any status information from light bulbs.
 - If for some reason you need to change gateway port, pass port=n argument to constructor.
 - Run testsuite with "python setup.py test". Tests only run the code without checking whether proper commands were sent.
 - RGBW/white bulb commands differ a bit. Obviously, it is not possible to change color for white bulbs. For white bulbs, there is no absolute brightness settings. Similarly, only white bulbs allow adjusting color temperature (with .cooler and .warmer). There is 10 steps for white bulb brightness and color temperature.
