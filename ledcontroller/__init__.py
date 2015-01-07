@@ -332,6 +332,8 @@ class LedController(object):
 
             The command is sent only once, as multiple commands would blink lights rapidly.
             There is no way to automatically detect whether transmitting the command succeeded or not.
+
+            This does not work with wifi gateway v3.
             """
         self.off(group)
         if group is None or group == 0:
