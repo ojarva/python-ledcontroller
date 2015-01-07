@@ -1,11 +1,10 @@
 """
 Library for controlling limitless/milight/easybulb RGBW/white leds bulbs.
 
-Both white and RGBW commandsets are implemented. Older RGB lights are not supported.
+Commands for white and RGBW bulbs are implemented. Older RGB lights are not supported yet.
 
 Before using this library, you need to use smartphone/tablet app to configure
-light groups to the gateway. Configuring remotes does not enable same groups
-on the gateway.
+light groups to the gateway. Configuring remotes does nothing to configure the gateway.
 
 See https://github.com/ojarva/python-ledcontroller for more information.
 
@@ -86,7 +85,7 @@ class LedController(object):
             - repeat_commands (default 3): how many times safe commands are repeated to ensure successful execution.
             - port (default 8899): UDP port on wifi gateway
             - pause_between_commands (default 0.1 (in seconds)): how long pause there should be between sending commands to the gateway.
-            - group_1, group_2, ...: set bulb type for group.
+            - group_1, group_2, ...: set bulb type for group. Currently either rgbw (default) and "white" are supported. See also .set_group_type method.
             """
         self.group = {}
         self.has_white = False
@@ -360,7 +359,8 @@ class LedController(object):
             With three repeats, running these consecutively takes approximately 100ms * 13 commands * 3 times = 3.9 seconds.
 
             With batch_run, execution takes same time, but first loop - each command is sent once to every group -
-            is finished within 1.3 seconds. After that, command is repeated two times.
+            is finished within 1.3 seconds. After that, each command is repeated two times. Most of the time, this ensures
+            slightly faster changes for each group.
 
             Usage:
 
