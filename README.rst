@@ -59,7 +59,14 @@ Notes
 -----
 
 - There is automatic 100ms pause between each command. Almost every action requires sending more than one command, thus requiring several hundred milliseconds. You can change this with keyword argument "pause_between_commands". However, decreasing the delay will cause some commands to fail.
-- As the gateway seems to be rather unreliable, all commands are sent multiple times (three by default). If you want to change this, use "LedController(ip, repeat_commands=n)" to create new lightcontroller object.
-- If for some reason you need to change gateway port, use keyword port= to change it.
+- As the gateway seems to be rather unreliable, all commands are sent multiple times (three by default). If you want to change this, use "LedController(ip, repeat_commands=n)" to create new lightcontroller instance..
+- If for some reason you need to change gateway port, pass port=n argument to constructor.
 - Run testsuite with "python setup.py test". Tests only run the code without checking whether proper commands were sent.
 - RGBW/white bulb commands differ a bit. Obviously, it is not possible to change color for white bulbs. For white bulbs, there is no absolute brightness settings. Similarly, only white bulbs allow adjusting color temperature (with .cooler and .warmer). There is 10 steps for white bulb brightness and color temperature.
+
+Additional notes:
+
+- I bought my bulbs, remotes and gateway from `LimitlessLED <http://www.limitlessled.com/>`_. Unfortunately, they have really expensive shipping ($50 to Finland). Furthermore, when ordering to Finland, taxes and customs were about 30% in top of original price.
+- `milight.com <http://www.milight.com/>`_ and `easybulb.com <http://easybulb.com/en/>`_ sell same products with two different brands. These are more expensive than LimitlessLED, but ship from UK.
+- At least some products from s'luce iLight are exactly the same with different branding.
+- Beware that at least milight.com and easybulb.com sell older version of the wifi gateway (v3, vs. v4 from LimitlessLED). v3 does not support nightmode, and seems to be less reliable than v4.
