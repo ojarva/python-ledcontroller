@@ -63,10 +63,13 @@ Notes
 - If for some reason you need to change gateway port, pass port=n argument to constructor.
 - Run testsuite with "python setup.py test". Tests only run the code without checking whether proper commands were sent.
 - RGBW/white bulb commands differ a bit. Obviously, it is not possible to change color for white bulbs. For white bulbs, there is no absolute brightness settings. Similarly, only white bulbs allow adjusting color temperature (with .cooler and .warmer). There is 10 steps for white bulb brightness and color temperature.
+- Brightness settings are stored by bulbs. Brightness is saved separately for both white and RGB modes. Furthermore, bulbs store the last color. Sending .on() restores previous brightness and color.
 
-Additional notes:
+Stores and brands
+-----------------
 
 - I bought my bulbs, remotes and gateway from `LimitlessLED <http://www.limitlessled.com/>`_. Unfortunately, they have really expensive shipping ($50 to Finland). Furthermore, when ordering to Finland, taxes and customs were about 30% in top of original price.
 - `milight.com <http://www.milight.com/>`_ and `easybulb.com <http://easybulb.com/en/>`_ sell same products with two different brands. These are more expensive than LimitlessLED, but ship from UK.
 - At least some products from s'luce iLight are exactly the same with different branding.
 - Beware that at least milight.com and easybulb.com sell older version of the wifi gateway (v3, vs. v4 from LimitlessLED). v3 does not support nightmode, and seems to be less reliable than v4.
+- Try `aliexpress.com <http://aliexpress.com/>`_ with search "milight". Beware of older versions (RGB bulbs) and non-remote-controlled bulbs sold with same brand.

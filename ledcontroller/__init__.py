@@ -83,7 +83,7 @@ class LedController(object):
     def __init__(self, ip, **kwargs):
         """ Optional keyword arguments:
             - repeat_commands (default 3): how many times safe commands are repeated to ensure successful execution.
-            - port (default 8899): UDP port on wifi gateway
+            - port (default 8899): UDP port on wifi gateway. Port is 50000 for gw v1 and v2.
             - pause_between_commands (default 0.1 (in seconds)): how long pause there should be between sending commands to the gateway.
             - group_1, group_2, ...: set bulb type for group. Currently either rgbw (default) and "white" are supported. See also .set_group_type method.
             """
@@ -333,6 +333,8 @@ class LedController(object):
             There is no way to automatically detect whether transmitting the command succeeded or not.
 
             This does not work with wifi gateway v3.
+
+            Contrary to limitlessled documentation, this works with RGBW bulbs.
             """
         self.off(group)
         if group is None or group == 0:
