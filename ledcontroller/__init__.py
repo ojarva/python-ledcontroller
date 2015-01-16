@@ -50,7 +50,7 @@ class LedController(object):
     WHITE_GROUP_X_NIGHTMODE = [(b"\xbb",), (b"\xb3",), (b"\xba",), (b"\xb6",)]
 
 
-    RGBW_GROUP_X_ON =  [(b"\x45",), (b"\x47",), (b"\x49",), (b"\x4b",)]
+    RGBW_GROUP_X_ON = [(b"\x45",), (b"\x47",), (b"\x49",), (b"\x4b",)]
     RGBW_GROUP_X_OFF = [(b"\x46",), (b"\x48",), (b"\x4a",), (b"\x4c",)]
     RGBW_GROUP_X_TO_WHITE = [(b"\xc5",), (b"\xc7",), (b"\xc9",), (b"\xcb",)]
     RGBW_GROUP_X_NIGHTMODE = [(b"\xc6",), (b"\xc8",), (b"\xca",), (b"\xcc",)]
@@ -80,7 +80,7 @@ class LedController(object):
      "color_to_lavendar": (b"\x40", b"\xf0"),
     }
 
-    def __init__(self, ip, **kwargs):
+    def __init__(self, gateway_ip, **kwargs):
         """ Optional keyword arguments:
             - repeat_commands (default 3): how many times safe commands are repeated to ensure successful execution.
             - port (default 8899): UDP port on wifi gateway. Port is 50000 for gw v1 and v2.
@@ -90,10 +90,10 @@ class LedController(object):
         self.group = {}
         self.has_white = False
         self.has_rgbw = False
-        for a in range(1, 5):
-            self.set_group_type(a, kwargs.get("group_%s" % a, "rgbw"))
-        self.ip = ip
-        self.port = int(kwargs.get("port", 8899))
+        for group in range(1, 5):
+            self.set_group_type(group, kwargs.get("group_%s" % group, "rgbw"))
+        self.gateway_ip = gateway_ip
+        self.gateway_port = int(kwargs.get("port", 8899))
         self.last_command_at = 0
         self.repeat_commands = int(kwargs.get("repeat_commands", 3))
         if self.repeat_commands == 0:
@@ -107,7 +107,7 @@ class LedController(object):
         """
         return self.group[group]
 
-    def set_group_type(self, group, type):
+    def set_group_type(self, group, bulb_type):
         """ Sets bulb type for specified group.
 
         Group must be int between 1 and 4.
@@ -116,11 +116,12 @@ class LedController(object):
 
         Alternatively, use constructor keywords group_1, group_2 etc. to set bulb types.
         """
-        self.group[group] = type
+        self.group[group] = bulb_type
         if "white" in self.group.values():
             self.has_white = True
         else:
             self.has_white = False
+
         if "rgbw" in self.group.values():
             self.has_rgbw = True
         else:
@@ -148,7 +149,7 @@ class LedController(object):
             command = command + b"\x55"
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.sendto(command, (self.ip, self.port))
+        sock.sendto(command, (self.gateway_ip, self.gateway_port))
         sock.close()
         return command
 
@@ -370,7 +371,7 @@ class LedController(object):
         """
         original_retries = self.repeat_commands
         self.repeat_commands = 1
-        for retries in range(original_retries):
+        for _ in range(original_retries):
             for command in commands:
                 cmd = command[0]
                 args = command[1:]
@@ -379,9 +380,9 @@ class LedController(object):
 
 
 def main():
+    """ Test function for development """
     led = LedController("192.168.1.6")
     led.batch_run((led.disco, 3), (led.set_brightness, 10, 3), (led.set_color, "red", 3))
-#    led.set_color("red", 3)
 
 if __name__ == '__main__':
     main()

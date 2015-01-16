@@ -7,16 +7,16 @@ class TestRgbwLights(unittest.TestCase):
 
     def test_default_constructor(self):
         led = LedController("127.0.0.1")
-        self.assertEqual(led.ip, "127.0.0.1")
-        self.assertEqual(led.port, 8899)
+        self.assertEqual(led.gateway_ip, "127.0.0.1")
+        self.assertEqual(led.gateway_port, 8899)
         self.assertEqual(led.repeat_commands, 3)
         self.assertEqual(led.pause_between_commands, 0.1)
 
     def test_changing_port(self):
         led = LedController("127.0.0.1", port=123)
-        self.assertEqual(led.port, 123)
+        self.assertEqual(led.gateway_port, 123)
         led = LedController("127.0.0.1", port="123")
-        self.assertEqual(led.port, 123)
+        self.assertEqual(led.gateway_port, 123)
 
     def test_sleep(self):
         led = LedController("127.0.0.1")
