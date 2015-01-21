@@ -109,8 +109,3 @@ class TestWhiteLights(TestRgbwLights):
 class TestCombinedSetup(TestRgbwLights):
     def setUp(self):
         self.led = LedController("127.0.0.1", pause_between_commands=0, repeat_commands=0, group_1="rgbw", group_2="white", group_3="rgbw", group_4="white")
-
-
-
-if __name__ == '__main__':
-    unittest.main()

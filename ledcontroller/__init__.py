@@ -378,12 +378,3 @@ class LedController(object):
                 args = command[1:]
                 cmd(*args)
         self.repeat_commands = original_retries
-
-
-def main():
-    """ Test function for development """
-    led = LedController("192.168.1.6")
-    led.batch_run((led.disco, 3), (led.set_brightness, 10, 3), (led.set_color, "red", 3))
-
-if __name__ == '__main__':
-    main()
