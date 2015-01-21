@@ -116,6 +116,9 @@ class LedController(object):
 
         Alternatively, use constructor keywords group_1, group_2 etc. to set bulb types.
         """
+        if bulb_type not in ("rgbw", "white"):
+            raise AttributeError("Bulb type must be either rgbw or white")
+
         self.group[group] = bulb_type
         if "white" in self.group.values():
             self.has_white = True
@@ -179,8 +182,6 @@ class LedController(object):
                         cmd_tmp = self.WHITE_COMMANDS
                     elif self.get_group_type(group) == "rgbw":
                         cmd_tmp = self.RGBW_COMMANDS
-                    else:
-                        raise NotImplementedError("Invalid group type: %s" % self.get_group_type(group))
                     self._send_command(cmd_tmp.get(kwargs["command"]))
 
     def on(self, group=None):

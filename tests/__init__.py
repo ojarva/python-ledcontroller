@@ -95,6 +95,13 @@ class TestRgbwLights(unittest.TestCase):
         led = self.led
         led.batch_run((led.set_brightness, 10, 3), (led.set_color, "red"), (led.off,))
 
+    def test_invalid_group_type(self):
+        self.assertRaises(AttributeError, self.led.set_group_type, 1, "asdf")
+
+    def test_invalid_group_number(self):
+        self.assertRaises(AttributeError, self.led.on, 5)
+
+
 class TestWhiteLights(TestRgbwLights):
     def setUp(self):
         self.led = LedController("127.0.0.1", pause_between_commands=0, repeat_commands=0, group_1="white", group_2="white", group_3="white", group_4="white")
