@@ -1,5 +1,5 @@
 import unittest
-from ledcontroller import LedController
+from ledcontroller import LedController, LedControllerPool
 
 class TestRgbwLights(unittest.TestCase):
     def setUp(self):
@@ -109,3 +109,16 @@ class TestWhiteLights(TestRgbwLights):
 class TestCombinedSetup(TestRgbwLights):
     def setUp(self):
         self.led = LedController("127.0.0.1", pause_between_commands=0, repeat_commands=0, group_1="rgbw", group_2="white", group_3="rgbw", group_4="white")
+
+class TestConnectionPool(unittest.TestCase):
+    def setUp(self):
+        self.ledpool = LedControllerPool(["127.0.0.1", "127.0.0.2"])
+
+    def test_set_color_0(self):
+        self.ledpool.execute(0, "set_color", "red", 1)
+
+    def test_set_color_1(self):
+        self.ledpool.execute(1, "set_color", "blue", 3)
+
+    def test_on(self):
+        self.ledpool.execute(0, "on")

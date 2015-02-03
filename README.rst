@@ -55,6 +55,18 @@ Using both white and RGBW bulbs:
   led.brightness_up(4) # Adjusts group 4 brightness.
   led.set_brightness(50) # Adjusts all RGBW bulbs to 50%. Does not affect white lights.
 
+Controller pools:
+
+When using multiple controllers, it is important to keep same 100ms pause between each command. Use LedControllerPool class to automate this.
+
+::
+
+  import ledcontroller
+  ledpool = ledcontroller.LedControllerPool(["192.168.1.6", "192.168.1.7"])
+  ledpool.execute(0, "on")
+  ledpool.execute(1, "disco", 3)
+  ledpool.execute(0, "set_color", "red", 1)
+
 Notes
 -----
 

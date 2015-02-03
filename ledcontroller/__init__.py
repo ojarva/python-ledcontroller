@@ -15,8 +15,21 @@ import socket
 import struct
 import time
 
-__all__ = ["LedController"]
+__all__ = ["LedController", "LedControllerPool"]
 
+class LedControllerPool(object):
+    def __init__(self, gateway_ips, **kwargs):
+        self.controllers = []
+        for ip in gateway_ips:
+            self.controllers.append(LedController(ip, **kwargs))
+        self.last_command_at = 0
+
+    def execute(self, controller_id, command, *args, **kwargs):
+        controller_instance = self.controllers[controller_id]
+        controller_instance.last_command_at = self.last_command_at
+        ret_val = getattr(controller_instance, command)(*args, **kwargs)
+        self.last_command_at = controller_instance.last_command_at
+        return ret_val
 
 class LedController(object):
     """
