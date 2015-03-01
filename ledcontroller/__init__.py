@@ -278,6 +278,20 @@ class LedController(object):
         have any effect. """
         self._send_to_group(group, command="warmer")
 
+    @classmethod
+    def get_brightness_level(cls, percent):
+        """ Gets internal brightness level.
+
+            percent should be integer from 0 to 100.
+            Return value is 2 (minimum) - 27 (maximum)
+        """
+        # Clamp to appropriate range.
+        percent = min(100, max(0, percent))
+
+        # Map 0-100 to 2-27
+        value = int(2 + ((float(percent) / 100) * 25))
+        return percent, value
+
     def set_brightness(self, percent, group=None):
         """ Sets brightness.
 
@@ -294,11 +308,7 @@ class LedController(object):
                 percent = int(percent)
             else:
                 percent = int(percent * 100)
-        # Clamp to appropriate range.
-        percent = min(100, max(0, percent))
-
-        # Map 0-100 to 2-27
-        value = int(2 + ((float(percent) / 100) * 25))
+        percent, value = self.get_brightness_level(percent)
         self.on(group)
         self._send_command((b"\x4e", struct.pack("B", value)))
         return percent
