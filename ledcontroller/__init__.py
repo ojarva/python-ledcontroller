@@ -17,6 +17,7 @@ import time
 
 __all__ = ["LedController", "LedControllerPool"]
 
+
 class LedControllerPool(object):
     def __init__(self, gateway_ips, **kwargs):
         self.controllers = []
@@ -30,6 +31,7 @@ class LedControllerPool(object):
         ret_val = getattr(controller_instance, command)(*args, **kwargs)
         self.last_command_at = controller_instance.last_command_at
         return ret_val
+
 
 class LedController(object):
     """
@@ -47,14 +49,14 @@ class LedController(object):
     """
 
     WHITE_COMMANDS = {
-     "all_on": (b"\x35",),
-     "all_off": (b"\x39",),
-     "all_full": (b"\xb5",),
-     "all_nightmode": (b"\xb9",),
-     "warmer": (b"\x3e",),
-     "cooler": (b"\x3f",),
-     "brightness_up": (b"\x3c",),
-     "brightness_down": (b"\x34",),
+        "all_on": (b"\x35",),
+        "all_off": (b"\x39",),
+        "all_full": (b"\xb5",),
+        "all_nightmode": (b"\xb9",),
+        "warmer": (b"\x3e",),
+        "cooler": (b"\x3f",),
+        "brightness_up": (b"\x3c",),
+        "brightness_down": (b"\x34",),
     }
 
     WHITE_GROUP_X_ON = [(b"\x38",), (b"\x3d",), (b"\x37",), (b"\x32",)]
@@ -62,35 +64,34 @@ class LedController(object):
     WHITE_GROUP_X_FULL = [(b"\xb8",), (b"\xbd",), (b"\xb7",), (b"\xb2",)]
     WHITE_GROUP_X_NIGHTMODE = [(b"\xbb",), (b"\xb3",), (b"\xba",), (b"\xb6",)]
 
-
     RGBW_GROUP_X_ON = [(b"\x45",), (b"\x47",), (b"\x49",), (b"\x4b",)]
     RGBW_GROUP_X_OFF = [(b"\x46",), (b"\x48",), (b"\x4a",), (b"\x4c",)]
     RGBW_GROUP_X_TO_WHITE = [(b"\xc5",), (b"\xc7",), (b"\xc9",), (b"\xcb",)]
     RGBW_GROUP_X_NIGHTMODE = [(b"\xc6",), (b"\xc8",), (b"\xca",), (b"\xcc",)]
     RGBW_COMMANDS = {
-     "all_on": (b"\x42",),
-     "all_off": (b"\x41",),
-     "all_white": (b"\xc2",),
-     "disco": (b"\x4d",),
-     "disco_faster": (b"\x44",),
-     "disco_slower": (b"\x43",),
-     "all_nightmode": (b"\xc1",),
-     "color_to_violet": (b"\x40", b"\x00"),
-     "color_to_royal_blue": (b"\x40", b"\x10"),
-     "color_to_baby_blue": (b"\x40", b"\x20"),
-     "color_to_aqua": (b"\x40", b"\x30"),
-     "color_to_royal_mint": (b"\x40", b"\x40"),
-     "color_to_seafoam_green": (b"\x40", b"\x50"),
-     "color_to_green": (b"\x40", b"\x60"),
-     "color_to_lime_green": (b"\x40", b"\x70"),
-     "color_to_yellow": (b"\x40", b"\x80"),
-     "color_to_yellow_orange": (b"\x40", b"\x90"),
-     "color_to_orange": (b"\x40", b"\xa0"),
-     "color_to_red": (b"\x40", b"\xb0"),
-     "color_to_pink": (b"\x40", b"\xc0"),
-     "color_to_fusia": (b"\x40", b"\xd0"),
-     "color_to_lilac": (b"\x40", b"\xe0"),
-     "color_to_lavendar": (b"\x40", b"\xf0"),
+        "all_on": (b"\x42",),
+        "all_off": (b"\x41",),
+        "all_white": (b"\xc2",),
+        "disco": (b"\x4d",),
+        "disco_faster": (b"\x44",),
+        "disco_slower": (b"\x43",),
+        "all_nightmode": (b"\xc1",),
+        "color_to_violet": (b"\x40", b"\x00"),
+        "color_to_royal_blue": (b"\x40", b"\x10"),
+        "color_to_baby_blue": (b"\x40", b"\x20"),
+        "color_to_aqua": (b"\x40", b"\x30"),
+        "color_to_royal_mint": (b"\x40", b"\x40"),
+        "color_to_seafoam_green": (b"\x40", b"\x50"),
+        "color_to_green": (b"\x40", b"\x60"),
+        "color_to_lime_green": (b"\x40", b"\x70"),
+        "color_to_yellow": (b"\x40", b"\x80"),
+        "color_to_yellow_orange": (b"\x40", b"\x90"),
+        "color_to_orange": (b"\x40", b"\xa0"),
+        "color_to_red": (b"\x40", b"\xb0"),
+        "color_to_pink": (b"\x40", b"\xc0"),
+        "color_to_fusia": (b"\x40", b"\xd0"),
+        "color_to_lilac": (b"\x40", b"\xe0"),
+        "color_to_lavendar": (b"\x40", b"\xf0"),
     }
 
     def __init__(self, gateway_ip, **kwargs):
@@ -189,7 +190,7 @@ class LedController(object):
                 if group < 1 or group > 4:
                     raise AttributeError("Group must be between 1 and 4 (was %s)" % group)
                 if kwargs.get("per_group"):
-                    self._send_command(kwargs.get("%s_cmd" % self.get_group_type(group), [None, None, None, None])[group-1])
+                    self._send_command(kwargs.get("%s_cmd" % self.get_group_type(group), [None, None, None, None])[group - 1])
                 else:
                     if self.get_group_type(group) == "white":
                         cmd_tmp = self.WHITE_COMMANDS
@@ -244,10 +245,10 @@ class LedController(object):
 
             If group (1-4) is not specified, all four groups
             will be switched on and to specified color."""
-        if color == "white": # hack, as commands for setting color to white differ from other colors.
+        if color == "white":   # hack, as commands for setting color to white differ from other colors.
             self.white(group)
         else:
-            self._send_to_group(group, command="color_to_"+color)
+            self._send_to_group(group, command="color_to_" + color)
         return color
 
     def brightness_up(self, group=None):
