@@ -29,13 +29,14 @@ Usage
 
   import ledcontroller
   led = ledcontroller.LedController("192.168.1.6")
-  led.off() # Switches all groups off
-  led.set_color("red", 1) # Switches group 1 on and changes color to red.
-  led.white(2) # Group 2 on and color to white.
-  led.set_brightness(50, 2) # Group 2 on and brightness to 50%.
-  led.disco(3) # Group 3 on and enable disco mode.
-  led.disco_faster(3) # Group 3 on and adjust disco mode speed.
-  led.on(4) # Switch group 4 on. Bulb automatically restores previous color and brightness.
+  led.off()  # Switches all groups off
+  led.set_color("red", 1)  # Switches group 1 on and changes color to red.
+  led.white(2)  # Group 2 on and color to white.
+  led.set_brightness(50, 2)  # Group 2 on and brightness to 50%.
+  led.set_color(150, 2)  # set color without using presets. Number must be 0-255
+  led.disco(3)  # Group 3 on and enable disco mode.
+  led.disco_faster(3)  # Group 3 on and adjust disco mode speed.
+  led.on(4)  # Switch group 4 on. Bulb automatically restores previous color and brightness.
 
 Using both white and RGBW bulbs:
 
@@ -44,16 +45,16 @@ Using both white and RGBW bulbs:
   import ledcontroller
   # By default, all groups are RGBW bulbs.
   led = ledcontroller.LedController("192.168.1.6", group_1="white", group_4="white")
-  led.set_group_type(1, "white") # This is same as using constructor keyword group_1.
+  led.set_group_type(1, "white")  # This is same as using constructor keyword group_1.
   led.on()
-  led.white(2) # Switches RGBW group on and changes color to white.
-  led.white(1) # Turns white group on.
-  led.warmer() # Adjusts all white groups to warmer color. Switches all groups on.
-  led.cooler(1) # Adjusts group 1 white bulbs to cooler color.
-  led.brightness_up() # Adjusts white group brightness up. Does not affect RGBW lights.
-  led.brightness_up(2) # Does nothing to RGBW bulbs.
-  led.brightness_up(4) # Adjusts group 4 brightness.
-  led.set_brightness(50) # Adjusts all RGBW bulbs to 50%. Does not affect white lights.
+  led.white(2)  # Switches RGBW group on and changes color to white.
+  led.white(1)  # Turns white group on.
+  led.warmer()  # Adjusts all white groups to warmer color. Switches all groups on.
+  led.cooler(1)  # Adjusts group 1 white bulbs to cooler color.
+  led.brightness_up()  # Adjusts white group brightness up. Does not affect RGBW lights.
+  led.brightness_up(2)  # Does nothing to RGBW bulbs.
+  led.brightness_up(4)  # Adjusts group 4 brightness.
+  led.set_brightness(50)  # Adjusts all RGBW bulbs to 50%. Does not affect white lights.
 
 Controller pools:
 

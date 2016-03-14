@@ -1,6 +1,7 @@
 import unittest
 from ledcontroller import LedController, LedControllerPool
 
+
 class TestRgbwLights(unittest.TestCase):
     def setUp(self):
         self.led = LedController("127.0.0.1", pause_between_commands=0, repeat_commands=0)
@@ -48,6 +49,16 @@ class TestRgbwLights(unittest.TestCase):
     def test_set_color(self):
         self.led.set_color("white")
         self.led.set_color("red")
+
+    def test_set_color_by_int(self):
+        self.led.set_color(0)
+        self.led.set_color(1)
+        self.led.set_color(156)
+        self.led.set_color(255)
+        with self.assertRaises(AttributeError):
+            self.led.set_color(-1)
+        with self.assertRaises(AttributeError):
+            self.led.set_color(256)
 
     def test_set_brightness(self):
         self.assertEquals(self.led.set_brightness(-1), 0, "negative brightness not clamped properly")
@@ -106,9 +117,11 @@ class TestWhiteLights(TestRgbwLights):
     def setUp(self):
         self.led = LedController("127.0.0.1", pause_between_commands=0, repeat_commands=0, group_1="white", group_2="white", group_3="white", group_4="white")
 
+
 class TestCombinedSetup(TestRgbwLights):
     def setUp(self):
         self.led = LedController("127.0.0.1", pause_between_commands=0, repeat_commands=0, group_1="rgbw", group_2="white", group_3="rgbw", group_4="white")
+
 
 class TestConnectionPool(unittest.TestCase):
     def setUp(self):
