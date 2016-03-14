@@ -255,14 +255,14 @@ class LedController(object):
 
         Calling this method for RGBW lights won't
         have any effect on the brightness."""
-        self._send_to_group(group, command="brightness_down")
+        self._send_to_group(group, command="brightness_up")
 
     def brightness_down(self, group=None):
         """ Adjusts white bulb brightness down.
 
         Calling this method for RGBW lights won't
         have any effect on the brightness."""
-        self._send_to_group(group, command="brightness_up")
+        self._send_to_group(group, command="brightness_down")
 
     def cooler(self, group=None):
         """ Adjusts white bulb to cooler color temperature.
