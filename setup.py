@@ -9,7 +9,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='ledcontroller',
-    version='1.1.0',
+    version='1.2.0',
     description='Controller library for limitlessled/easybulb/milight Wi-Fi LEDs',
     long_description=long_description,
     url='https://github.com/ojarva/python-ledcontroller',
@@ -18,7 +18,7 @@ setup(
     license='BSD',
 
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Topic :: Home Automation',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
@@ -28,13 +28,15 @@ setup(
         'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: Implementation :: PyPy',
     ],
     keywords='limitlessled easybulb milight led wifi',
     packages=["ledcontroller"],
     install_requires=[],
     test_suite="tests",
 
-    extras_require = {
+    extras_require={
         'dev': ['twine', 'wheel'],
     },
 )
