@@ -11,6 +11,8 @@ See https://github.com/ojarva/python-ledcontroller for more information.
 Based on the documentation available at http://www.limitlessled.com/dev/ .
 """
 
+# pylint: disable=line-too-long
+
 import socket
 import struct
 import time
@@ -18,14 +20,26 @@ import time
 __all__ = ["LedController", "LedControllerPool"]
 
 
-class LedControllerPool(object):
+class LedControllerPool(object):  # pylint: disable=too-few-public-methods
+    """
+    Pooling for multiple controllers. Handles proper send pauses between controllers.
+    """
     def __init__(self, gateway_ips, **kwargs):
         self.controllers = []
-        for ip in gateway_ips:
-            self.controllers.append(LedController(ip, **kwargs))
+        for gateway_ip in gateway_ips:
+            self.controllers.append(LedController(gateway_ip, **kwargs))
         self.last_command_at = 0
 
     def execute(self, controller_id, command, *args, **kwargs):
+        """
+        Executes a single command, and sets sleep times properly.
+
+        - controller_id = index of controller, zero-based
+        - command is normal LedController command as a string
+        - *args and **kwargs are passed to command
+
+        For example, .execute(0, "on", 1) sends "on" command to group 1 on controller 0 (first IP passed to constructor).
+        """
         controller_instance = self.controllers[controller_id]
         controller_instance.last_command_at = self.last_command_at
         ret_val = getattr(controller_instance, command)(*args, **kwargs)
@@ -33,7 +47,7 @@ class LedControllerPool(object):
         return ret_val
 
 
-class LedController(object):
+class LedController(object):  # pylint: disable=too-many-instance-attributes
     """
     Main class for controlling limitless/milight/easybulb lights.
 
@@ -109,11 +123,17 @@ class LedController(object):
             self.set_group_type(group, kwargs.get("group_%s" % group, "rgbw"))
         self.gateway_ip = gateway_ip
         self.gateway_port = int(kwargs.get("port", 8899))
+        if self.gateway_port < 1 or self.gateway_port > 65535:
+            raise ValueError("Port must be 1-65535")
         self.last_command_at = 0
         self.repeat_commands = int(kwargs.get("repeat_commands", 3))
         if self.repeat_commands == 0:
             self.repeat_commands = 1
+        if self.repeat_commands < 1:
+            raise ValueError("repeat_commands must be > 0")
         self.pause_between_commands = float(kwargs.get("pause_between_commands", 0.1))
+        if self.pause_between_commands < 0:
+            raise ValueError("pause_between_commands must be >0")
 
     def get_group_type(self, group):
         """ Gets bulb type for specified group.
@@ -135,15 +155,8 @@ class LedController(object):
             raise AttributeError("Bulb type must be either rgbw or white")
 
         self.group[group] = bulb_type
-        if "white" in self.group.values():
-            self.has_white = True
-        else:
-            self.has_white = False
-
-        if "rgbw" in self.group.values():
-            self.has_rgbw = True
-        else:
-            self.has_rgbw = False
+        self.has_white = "white" in self.group.values()
+        self.has_rgbw = "rgbw" in self.group.values()
 
     def _send_command(self, input_command):
         """ You shouldn't use this method directly.
@@ -171,6 +184,16 @@ class LedController(object):
         sock.close()
         return command
 
+    def _send_to_all_groups(self, **kwargs):
+        if self.has_white:
+            self._send_command(self.WHITE_COMMANDS.get(kwargs["command"]))
+        if self.has_rgbw:
+            if kwargs["command"] == "color_by_int":
+                command = (self.RGBW_COMMANDS["color_by_int"], struct.pack("B", kwargs["color"]))
+            else:
+                command = self.RGBW_COMMANDS.get(kwargs["command"])
+            self._send_command(command)
+
     def _send_to_group(self, group, **kwargs):
         """ You shouldn't use this method directly.
 
@@ -183,30 +206,25 @@ class LedController(object):
             if kwargs.get("send_on", True):
                 self.on(group)
             if group is None or group == 0:
-                if self.has_white:
-                    self._send_command(self.WHITE_COMMANDS.get(kwargs["command"]))
-                if self.has_rgbw:
-                    if kwargs["command"] == "color_by_int":
-                        command = (self.RGBW_COMMANDS["color_by_int"], struct.pack("B", kwargs["color"]))
-                    else:
-                        command = self.RGBW_COMMANDS.get(kwargs["command"])
-                    self._send_command(command)
-            else:
-                if group < 1 or group > 4:
-                    raise AttributeError("Group must be between 1 and 4 (was %s)" % group)
-                if kwargs.get("per_group"):
-                    self._send_command(kwargs.get("%s_cmd" % self.get_group_type(group), [None, None, None, None])[group - 1])
-                else:
-                    if self.get_group_type(group) == "white":
-                        command = self.WHITE_COMMANDS.get(kwargs["command"])
-                    elif self.get_group_type(group) == "rgbw":
-                        if kwargs["command"] == "color_by_int":
-                            command = (self.RGBW_COMMANDS["color_by_int"], struct.pack("B", kwargs["color"]))
-                        else:
-                            command = self.RGBW_COMMANDS.get(kwargs["command"])
-                    self._send_command(command)
+                self._send_to_all_groups(**kwargs)
+                continue
 
-    def on(self, group=None):
+            if group < 1 or group > 4:
+                raise AttributeError("Group must be between 1 and 4 (was %s)" % group)
+
+            if kwargs.get("per_group"):
+                self._send_command(kwargs.get("%s_cmd" % self.get_group_type(group), [None, None, None, None])[group - 1])
+                continue
+            if self.get_group_type(group) == "white":
+                command = self.WHITE_COMMANDS.get(kwargs["command"])
+            elif self.get_group_type(group) == "rgbw":
+                if kwargs["command"] == "color_by_int":
+                    command = (self.RGBW_COMMANDS["color_by_int"], struct.pack("B", kwargs["color"]))
+                else:
+                    command = self.RGBW_COMMANDS.get(kwargs["command"])
+            self._send_command(command)
+
+    def on(self, group=None):  # pylint: disable=invalid-name
         """ Switches lights on. If group (1-4) is not specified,
             all four groups will be switched on. """
         if group is None or group == 0:
@@ -258,7 +276,7 @@ class LedController(object):
             """
         if color == "white":   # hack, as commands for setting color to white differ from other colors.
             self.white(group)
-        elif type(color) is int:
+        elif isinstance(color, int):
             if color < 0 or color > 255:
                 raise AttributeError("Color must be color keyword or 0-255")
             self._send_to_group(group, command="color_by_int", color=color)

@@ -1,17 +1,21 @@
-from setuptools import setup, find_packages
-from codecs import open
-from os import path
+"""
+Packaging setup for ledcontroller
+"""
 
-here = path.abspath(path.dirname(__file__))
+# pylint: disable=line-too-long
 
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
-    long_description = f.read()
+import os.path
+from codecs import open as codecs_open
+from setuptools import setup
+
+with codecs_open(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'README.rst'), encoding='utf-8') as f:
+    LONG_DESCRIPTION = f.read()
 
 setup(
     name='ledcontroller',
     version='1.2.0',
     description='Controller library for limitlessled/easybulb/milight Wi-Fi LEDs',
-    long_description=long_description,
+    long_description=LONG_DESCRIPTION,
     url='https://github.com/ojarva/python-ledcontroller',
     author='Olli Jarva',
     author_email='olli@jarva.fi',
@@ -31,7 +35,7 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
-    keywords='limitlessled easybulb milight led wifi',
+    keywords='applight applamp dekolight easybulb ilight limitlessled led ledme milight wifi',
     packages=["ledcontroller"],
     install_requires=[],
     test_suite="tests",
