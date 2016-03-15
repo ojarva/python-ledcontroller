@@ -13,7 +13,7 @@ with codecs_open(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'READM
 
 setup(
     name='ledcontroller',
-    version='1.2.0',
+    version='1.3.0',
     description='Controller library for limitlessled/easybulb/milight Wi-Fi LEDs',
     long_description=LONG_DESCRIPTION,
     url='https://github.com/ojarva/python-ledcontroller',
