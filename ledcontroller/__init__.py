@@ -32,7 +32,7 @@ class LedControllerPool(object):  # pylint: disable=too-few-public-methods
 
     def execute(self, controller_id, command, *args, **kwargs):
         """
-        Executes a single command, and sets sleep times properly.
+        Execute a single command, and sets sleep times properly.
 
         - controller_id = index of controller, zero-based
         - command is normal LedController command as a string
@@ -136,14 +136,14 @@ class LedController(object):  # pylint: disable=too-many-instance-attributes
             raise ValueError("pause_between_commands must be >0")
 
     def get_group_type(self, group):
-        """ Gets bulb type for specified group.
+        """ Get bulb type for specified group.
 
         Group must be int between 1 and 4.
         """
         return self.group[group]
 
     def set_group_type(self, group, bulb_type):
-        """ Sets bulb type for specified group.
+        """ Set bulb type for specified group.
 
         Group must be int between 1 and 4.
 
@@ -161,14 +161,14 @@ class LedController(object):  # pylint: disable=too-many-instance-attributes
     def _send_command(self, input_command):
         """ You shouldn't use this method directly.
 
-            Sends a single command. If previous command was sent
+            Send a single command. If previous command was sent
             recently, sleep for 100ms (configurable with pause_between_commands
             constructor keyword). """
         if input_command is None:
             return
         time_since_last_command = time.time() - self.last_command_at
         if time_since_last_command < self.pause_between_commands:
-            # Lights require 100ms pause between commands to function at least almost reliably.
+            # Wifi gateway requires 100ms pause between commands to function at least somewhat reliably.
             time.sleep(self.pause_between_commands - time_since_last_command)
         self.last_command_at = time.time()
         command = b""
@@ -197,7 +197,7 @@ class LedController(object):  # pylint: disable=too-many-instance-attributes
     def _send_to_group(self, group, **kwargs):
         """ You shouldn't use this method directly.
 
-        Sends a single command to specific group.
+        Send a single command to specific group.
 
         Handles automatically sending command to white or rgbw group.
         """
@@ -225,7 +225,7 @@ class LedController(object):  # pylint: disable=too-many-instance-attributes
             self._send_command(command)
 
     def on(self, group=None):  # pylint: disable=invalid-name
-        """ Switches lights on. If group (1-4) is not specified,
+        """ Switch lights on. If group (1-4) is not specified,
             all four groups will be switched on. """
         if group is None or group == 0:
             self._send_to_group(group, send_on=False, command="all_on")
@@ -233,7 +233,7 @@ class LedController(object):  # pylint: disable=too-many-instance-attributes
         self._send_to_group(group, per_group=True, white_cmd=self.WHITE_GROUP_X_ON, rgbw_cmd=self.RGBW_GROUP_X_ON, send_on=False)
 
     def off(self, group=None):
-        """ Switches lights off. If group (1-4) is not specified,
+        """ Switch lights off. If group (1-4) is not specified,
             all four groups will be switched off. """
         if group is None or group == 0:
             self._send_to_group(group, send_on=False, command="all_off")
@@ -241,7 +241,7 @@ class LedController(object):  # pylint: disable=too-many-instance-attributes
         self._send_to_group(group, per_group=True, send_on=False, rgbw_cmd=self.RGBW_GROUP_X_OFF, white_cmd=self.WHITE_GROUP_X_OFF)
 
     def white(self, group=None):
-        """ Switches lights on and changes color to white.
+        """ Switch lights on and change color to white.
             If group (1-4) is not specified, all four groups
             will be switched on and to white. """
         if group is None or group == 0:
@@ -250,7 +250,7 @@ class LedController(object):  # pylint: disable=too-many-instance-attributes
         self._send_to_group(group, per_group=True, rgbw_cmd=self.RGBW_GROUP_X_TO_WHITE)
 
     def set_color(self, color, group=None):
-        """ Switches lights on and changes color. Available colors:
+        """ Switch lights on and change color. Available colors:
 
              - violet
              - royal_blue
@@ -274,39 +274,42 @@ class LedController(object):  # pylint: disable=too-many-instance-attributes
 
             Alternatively, use int (0-255) to specify the color.
             """
-        if color == "white":   # hack, as commands for setting color to white differ from other colors.
+        if color == "white":  # hack, as commands for setting color to white differ from other colors.
             self.white(group)
         elif isinstance(color, int):
             if color < 0 or color > 255:
                 raise AttributeError("Color must be color keyword or 0-255")
             self._send_to_group(group, command="color_by_int", color=color)
         else:
-            self._send_to_group(group, command="color_to_" + color)
+            color_command = "color_to_%s" % color
+            if color_command not in self.RGBW_COMMANDS:
+                raise AttributeError("'%s' is not a valid color." % color)
+            self._send_to_group(group, command=color_command)
         return color
 
     def brightness_up(self, group=None):
-        """ Adjusts white bulb brightness up.
+        """ Adjust white bulb brightness up.
 
         Calling this method for RGBW lights won't
         have any effect on the brightness."""
         self._send_to_group(group, command="brightness_up")
 
     def brightness_down(self, group=None):
-        """ Adjusts white bulb brightness down.
+        """ Adjust white bulb brightness down.
 
         Calling this method for RGBW lights won't
         have any effect on the brightness."""
         self._send_to_group(group, command="brightness_down")
 
     def cooler(self, group=None):
-        """ Adjusts white bulb to cooler color temperature.
+        """ Adjust white bulb to cooler color temperature.
 
         Calling this method for RGBW lights won't
         have any effect. """
         self._send_to_group(group, command="cooler")
 
     def warmer(self, group=None):
-        """ Adjusts white bulb to warmer color temperature.
+        """ Adjust white bulb to warmer color temperature.
 
         Calling this method for RGBW lights won't
         have any effect. """
@@ -314,10 +317,10 @@ class LedController(object):  # pylint: disable=too-many-instance-attributes
 
     @classmethod
     def get_brightness_level(cls, percent):
-        """ Gets internal brightness level.
+        """ Convert percents to bulbs internal range.
 
             percent should be integer from 0 to 100.
-            Return value is 2 (minimum) - 27 (maximum)
+            Return value is 2 (minimum brightness) - 27 (maximum brightness)
         """
         # Clamp to appropriate range.
         percent = min(100, max(0, percent))
@@ -327,10 +330,10 @@ class LedController(object):  # pylint: disable=too-many-instance-attributes
         return percent, value
 
     def set_brightness(self, percent, group=None):
-        """ Sets brightness.
+        """ Set brightness.
 
             Percent is int between 0 (minimum brightness) and 100 (maximum brightness), or
-            float between 0 (minimum brightness) and 1.0 (maximum brightness).
+            float between 0.0 (minimum brightness) and 1.0 (maximum brightness).
 
             See also .nightmode().
 
@@ -348,7 +351,9 @@ class LedController(object):  # pylint: disable=too-many-instance-attributes
         return percent
 
     def disco(self, group=None):
-        """ Starts disco mode. The command is executed only once, as multiple commands would cycle
+        """ Start disco mode.
+
+            The command is executed only once, as multiple commands would cycle
             disco modes rapidly. There is no way to automatically detect whether transmitting the command
             succeeded or not.
 
@@ -378,15 +383,15 @@ class LedController(object):  # pylint: disable=too-many-instance-attributes
         self._send_to_group(group, command="disco", retries=1)
 
     def disco_faster(self, group=None):
-        """ Adjusts up the speed of disco mode (if enabled; does not start disco mode). """
+        """ Adjust up the speed of disco mode (if enabled; does not start disco mode). """
         self._send_to_group(group, command="disco_faster", retries=1)
 
     def disco_slower(self, group=None):
-        """ Adjusts down the speed of disco mode (if enabled; does not start disco mode). """
+        """ Adjust down the speed of disco mode (if enabled; does not start disco mode). """
         self._send_to_group(group, command="disco_slower", retries=1)
 
     def nightmode(self, group=None):
-        """ Enables nightmode (very dim white light).
+        """ Enable nightmode (very dim white light).
 
             The command is sent only once, as multiple commands would blink lights rapidly.
             There is no way to automatically detect whether transmitting the command succeeded or not.
