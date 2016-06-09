@@ -208,7 +208,7 @@ class TestConnectionPool(unittest.TestCase):
 
     def test_set_color_1(self):
         """ Test setting color in controller 1 """
-        self.ledpool.execute(1, "set_color", "blue", 3)
+        self.ledpool.execute(1, "set_color", "aqua", 3)
 
     def test_on(self):
         """ Test turning lights on """
