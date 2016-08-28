@@ -13,11 +13,16 @@ Based on the documentation available at http://www.limitlessled.com/dev/ .
 
 # pylint: disable=line-too-long
 
+import math
 import socket
 import struct
 import time
+from collections import namedtuple
+from colorsys import rgb_to_hls
 
-__all__ = ["LedController", "LedControllerPool"]
+__all__ = ["LedController", "LedControllerPool", "RGB"]
+
+RGB = namedtuple("RGB", "R G B")
 
 
 class LedControllerPool:  # pylint: disable=too-few-public-methods
@@ -280,6 +285,14 @@ class LedController:  # pylint: disable=too-many-instance-attributes
             """
         if color == "white":  # hack, as commands for setting color to white differ from other colors.
             self.white(group)
+        elif isinstance(color, RGB):
+            if color.R == 0 and color.G == 0 and color.B == 0:
+                self.off(group)
+            elif color.R == 255 and color.G == 255 and color.B == 255:
+                self.white(group)
+            else:
+                hue = rgb_to_hue(*color)
+                self._send_to_group(group, command="color_by_int", color=hue)
         elif isinstance(color, int):
             if color < 0 or color > 255:
                 raise AttributeError("Color must be color keyword or 0-255")
@@ -451,3 +464,21 @@ class LedController:  # pylint: disable=too-many-instance-attributes
                 args = command[1:]
                 cmd(*args)
         self.repeat_commands = original_retries
+
+
+def rgb_to_hue(red, green, blue):
+    """ Convert RGB color to hue value.
+
+    0% lightness or 100% lightness (white & black),
+    (255, 255, 255) & (0,0,0) aren't representable.
+
+    Also note that the LimitlessLED color spectrum
+    starts at blue.
+
+    :param red: Red value (0-255).
+    :param green: Green value (0-255).
+    :param blue: Blue value (0-255).
+    :returns: Hue value (0-255).
+    """
+    hue = rgb_to_hls(red / 255, green / 255, blue / 255)[0] * -1 + 1 + (2.0 / 3.0)  # RGB -> BGR
+    return int(math.floor((hue % 1) * 256))
