@@ -25,6 +25,7 @@ Usage
   led = ledcontroller.LedController("192.168.1.6")
   led.off()  # Switches all groups off
   led.set_color("red", 1)  # Switches group 1 on and changes color to red.
+  led.set_color(ledcontroller.RGB(255,0,0), 1) # Switches group 1 on and changes color to red.
   led.white(2)  # Group 2 on and color to white.
   led.set_brightness(50, 2)  # Group 2 on and brightness to 50%.
   led.set_color(150, 2)  # set color without using presets. Number must be 0-255
