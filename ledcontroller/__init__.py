@@ -63,33 +63,33 @@ class LedController(object):  # pylint: disable=too-many-instance-attributes
     """
 
     WHITE_COMMANDS = {
-        "all_on": (b"\x35",),
-        "all_off": (b"\x39",),
-        "all_full": (b"\xb5",),
-        "all_nightmode": (b"\xb9",),
-        "warmer": (b"\x3e",),
-        "cooler": (b"\x3f",),
-        "brightness_up": (b"\x3c",),
-        "brightness_down": (b"\x34",),
+        "all_on": (b"\x35", ),
+        "all_off": (b"\x39", ),
+        "all_full": (b"\xb5", ),
+        "all_nightmode": (b"\xb9", ),
+        "warmer": (b"\x3e", ),
+        "cooler": (b"\x3f", ),
+        "brightness_up": (b"\x3c", ),
+        "brightness_down": (b"\x34", ),
     }
 
-    WHITE_GROUP_X_ON = [(b"\x38",), (b"\x3d",), (b"\x37",), (b"\x32",)]
-    WHITE_GROUP_X_OFF = [(b"\x3b",), (b"\x33",), (b"\x3a",), (b"\x36",)]
-    WHITE_GROUP_X_FULL = [(b"\xb8",), (b"\xbd",), (b"\xb7",), (b"\xb2",)]
-    WHITE_GROUP_X_NIGHTMODE = [(b"\xbb",), (b"\xb3",), (b"\xba",), (b"\xb6",)]
+    WHITE_GROUP_X_ON = [(b"\x38", ), (b"\x3d", ), (b"\x37", ), (b"\x32", )]
+    WHITE_GROUP_X_OFF = [(b"\x3b", ), (b"\x33", ), (b"\x3a", ), (b"\x36", )]
+    WHITE_GROUP_X_FULL = [(b"\xb8", ), (b"\xbd", ), (b"\xb7", ), (b"\xb2", )]
+    WHITE_GROUP_X_NIGHTMODE = [(b"\xbb", ), (b"\xb3", ), (b"\xba", ), (b"\xb6", )]
 
-    RGBW_GROUP_X_ON = [(b"\x45",), (b"\x47",), (b"\x49",), (b"\x4b",)]
-    RGBW_GROUP_X_OFF = [(b"\x46",), (b"\x48",), (b"\x4a",), (b"\x4c",)]
-    RGBW_GROUP_X_TO_WHITE = [(b"\xc5",), (b"\xc7",), (b"\xc9",), (b"\xcb",)]
-    RGBW_GROUP_X_NIGHTMODE = [(b"\xc6",), (b"\xc8",), (b"\xca",), (b"\xcc",)]
+    RGBW_GROUP_X_ON = [(b"\x45", ), (b"\x47", ), (b"\x49", ), (b"\x4b", )]
+    RGBW_GROUP_X_OFF = [(b"\x46", ), (b"\x48", ), (b"\x4a", ), (b"\x4c", )]
+    RGBW_GROUP_X_TO_WHITE = [(b"\xc5", ), (b"\xc7", ), (b"\xc9", ), (b"\xcb", )]
+    RGBW_GROUP_X_NIGHTMODE = [(b"\xc6", ), (b"\xc8", ), (b"\xca", ), (b"\xcc", )]
     RGBW_COMMANDS = {
-        "all_on": (b"\x42",),
-        "all_off": (b"\x41",),
-        "all_white": (b"\xc2",),
-        "disco": (b"\x4d",),
-        "disco_faster": (b"\x44",),
-        "disco_slower": (b"\x43",),
-        "all_nightmode": (b"\xc1",),
+        "all_on": (b"\x42", ),
+        "all_off": (b"\x41", ),
+        "all_white": (b"\xc2", ),
+        "disco": (b"\x4d", ),
+        "disco_faster": (b"\x44", ),
+        "disco_slower": (b"\x43", ),
+        "all_nightmode": (b"\xc1", ),
         "color_by_int": (b"\x40"),
         "color_to_violet": (b"\x40", b"\x00"),
         "color_to_royal_blue": (b"\x40", b"\x10"),
@@ -230,7 +230,9 @@ class LedController(object):  # pylint: disable=too-many-instance-attributes
         if group is None or group == 0:
             self._send_to_group(group, send_on=False, command="all_on")
             return
-        self._send_to_group(group, per_group=True, white_cmd=self.WHITE_GROUP_X_ON, rgbw_cmd=self.RGBW_GROUP_X_ON, send_on=False)
+        self._send_to_group(
+            group, per_group=True, white_cmd=self.WHITE_GROUP_X_ON, rgbw_cmd=self.RGBW_GROUP_X_ON, send_on=False
+        )
 
     def off(self, group=None):
         """ Switch lights off. If group (1-4) is not specified,
@@ -238,7 +240,9 @@ class LedController(object):  # pylint: disable=too-many-instance-attributes
         if group is None or group == 0:
             self._send_to_group(group, send_on=False, command="all_off")
             return
-        self._send_to_group(group, per_group=True, send_on=False, rgbw_cmd=self.RGBW_GROUP_X_OFF, white_cmd=self.WHITE_GROUP_X_OFF)
+        self._send_to_group(
+            group, per_group=True, send_on=False, rgbw_cmd=self.RGBW_GROUP_X_OFF, white_cmd=self.WHITE_GROUP_X_OFF
+        )
 
     def white(self, group=None):
         """ Switch lights on and change color to white.
@@ -407,7 +411,14 @@ class LedController(object):  # pylint: disable=too-many-instance-attributes
             if self.has_white:
                 self._send_command(self.WHITE_COMMANDS["all_nightmode"])
         else:
-            self._send_to_group(group, per_group=True, rgbw_cmd=self.RGBW_GROUP_X_NIGHTMODE, white_cmd=self.WHITE_GROUP_X_NIGHTMODE, send_on=False, retries=1)
+            self._send_to_group(
+                group,
+                per_group=True,
+                rgbw_cmd=self.RGBW_GROUP_X_NIGHTMODE,
+                white_cmd=self.WHITE_GROUP_X_NIGHTMODE,
+                send_on=False,
+                retries=1
+            )
 
     def batch_run(self, *commands):
         """ Run batch of commands in sequence.
