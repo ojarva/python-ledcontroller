@@ -1,9 +1,6 @@
 Wi-Fi LED controller for LimitlessLed/easybulb/milight/... bulbs
 ================================================================
 
-.. image:: https://travis-ci.org/ojarva/python-ledcontroller.svg?branch=master
-    :target: https://travis-ci.org/ojarva/python-ledcontroller
-
 Controller for milight bulbs. Same bulbs are available under multiple different brands, including LimitlessLed, Easybulb, applight, dekolight and iLight.
 
 Before using this code, you need to configure your gateway to connect to wifi - there's multiple iOS and Android apps available for that. After that, configure light groups to the gateway. Configuring remote has nothing to do with configuring the gateway.
