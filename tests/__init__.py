@@ -5,9 +5,10 @@ Unit tests for ledcontroller.
 
 # pylint: disable=line-too-long
 
-import unittest
-from ledcontroller import LedController, LedControllerPool
 import time
+import unittest
+
+from ledcontroller import LedController, LedControllerPool
 
 
 class TestDefaultOptions(unittest.TestCase):
@@ -15,7 +16,6 @@ class TestDefaultOptions(unittest.TestCase):
     Tests that require creating a new LedController object. For example, tests related to
     constructor options.
     """
-
     def test_default_constructor(self):
         """ Verify default settings """
         led = LedController("127.0.0.1")
@@ -65,7 +65,6 @@ class TestRgbwLights(unittest.TestCase):  # pylint: disable=too-many-public-meth
     """
     Common tests for different setups (light combinations). Also default tests (rgbw only).
     """
-
     def setUp(self):
         self.led = LedController("127.0.0.1", pause_between_commands=0, repeat_commands=0)
 
@@ -167,7 +166,7 @@ class TestRgbwLights(unittest.TestCase):  # pylint: disable=too-many-public-meth
     def test_batch_run(self):
         """ Batch run multiple commands """
         led = self.led
-        led.batch_run((led.set_brightness, 10, 3), (led.set_color, "red"), (led.off,))
+        led.batch_run((led.set_brightness, 10, 3), (led.set_color, "red"), (led.off, ))
 
     def test_invalid_group_type(self):
         """ Set invalid group type """
@@ -183,7 +182,15 @@ class TestWhiteLights(TestRgbwLights):
     Tests for white-only bulbs
     """
     def setUp(self):
-        self.led = LedController("127.0.0.1", pause_between_commands=0, repeat_commands=0, group_1="white", group_2="white", group_3="white", group_4="white")
+        self.led = LedController(
+            "127.0.0.1",
+            pause_between_commands=0,
+            repeat_commands=0,
+            group_1="white",
+            group_2="white",
+            group_3="white",
+            group_4="white"
+        )
 
 
 class TestCombinedSetup(TestRgbwLights):
@@ -191,7 +198,15 @@ class TestCombinedSetup(TestRgbwLights):
     Tests for combined (both rgbw and white) setups.
     """
     def setUp(self):
-        self.led = LedController("127.0.0.1", pause_between_commands=0, repeat_commands=0, group_1="rgbw", group_2="white", group_3="rgbw", group_4="white")
+        self.led = LedController(
+            "127.0.0.1",
+            pause_between_commands=0,
+            repeat_commands=0,
+            group_1="rgbw",
+            group_2="white",
+            group_3="rgbw",
+            group_4="white"
+        )
 
 
 class TestConnectionPool(unittest.TestCase):
