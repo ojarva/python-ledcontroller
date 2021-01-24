@@ -20,7 +20,7 @@ import time
 __all__ = ["LedController", "LedControllerPool"]
 
 
-class LedControllerPool(object):  # pylint: disable=too-few-public-methods
+class LedControllerPool:  # pylint: disable=too-few-public-methods
     """
     Pooling for multiple controllers. Handles proper send pauses between controllers.
     """
@@ -47,7 +47,7 @@ class LedControllerPool(object):  # pylint: disable=too-few-public-methods
         return ret_val
 
 
-class LedController(object):  # pylint: disable=too-many-instance-attributes
+class LedController:  # pylint: disable=too-many-instance-attributes
     """
     Main class for controlling limitless/milight/easybulb lights.
 
@@ -165,7 +165,7 @@ class LedController(object):  # pylint: disable=too-many-instance-attributes
             recently, sleep for 100ms (configurable with pause_between_commands
             constructor keyword). """
         if input_command is None:
-            return
+            return None
         time_since_last_command = time.time() - self.last_command_at
         if time_since_last_command < self.pause_between_commands:
             # Wifi gateway requires 100ms pause between commands to function at least somewhat reliably.
